@@ -313,7 +313,9 @@ public final class Main {
   //  Step HSL_Threshold0:
    Mat hslThresholdInput = source0;
    double[] hslThresholdHue = {32.37410071942446, 83.03030303030303};
-   double[] hslThresholdSaturation = {52.74280575539568, 156.26262626262627};
+   //double[] hslThresholdSaturation = {52.74280575539568, 156.26262626262627};
+   double[] hslThresholdSaturation = {100.0, 0};
+   
    double[] hslThresholdLuminance = {246.83453237410075, 255.0};
     // double[] hslThresholdLuminance = {128.83453237410075, 255.0};
    hslThreshold(hslThresholdInput, hslThresholdHue, hslThresholdSaturation, hslThresholdLuminance, hslThresholdOutput);
@@ -605,7 +607,7 @@ public final class Main {
 
     // start image processing on camera 0 if present
     if (cameras.size() >= 1) {
-      VisionThread visionThread = new VisionThread(cameras.get(0),
+      VisionThread visionThread = new VisionThread(cameras.get(1),
               new FindTargetJava(), pipeline -> {
                   
                 
