@@ -15,24 +15,20 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
-import org.intel.rs.frame.DepthFrame;
-import org.intel.rs.frame.FrameList;
-import org.intel.rs.frame.VideoFrame;
-import org.intel.rs.pipeline.Config;
-import org.intel.rs.pipeline.Pipeline;
-import org.intel.rs.processing.Align;
-import org.intel.rs.types.Format;
-import org.intel.rs.types.Stream;
-import org.opencv.core.CvType;
-import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
+import org.opencv.core.Rect;
+import org.opencv.imgproc.Imgproc;
 
-import edu.wpi.first.cscore.UsbCamera;
-import edu.wpi.first.cscore.VideoSource;
-import edu.wpi.first.cscore.MjpegServer;
+import edu.wpi.cscore.MjpegServer;
+import edu.wpi.cscore.UsbCamera;
+import edu.wpi.cscore.VideoSource;
 import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.networktables.EntryListenerFlags;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.vision.VisionPipeline;
+import edu.wpi.first.vision.VisionThread;
+import pipeline.DepthPipeline;
+import pipeline.HoopTargetRealSenseJava;
 import pipeline.YellowStickyNotePipeline;
 
 /*
@@ -80,11 +76,6 @@ import pipeline.YellowStickyNotePipeline;
 
 public final class Main {
   private static String configFile = "/boot/frc.json";
-
-  // For RealSense
-  private static Align align = new Align(Stream.Color);
-  private static Pipeline realSenseFramePipeline = new Pipeline();
-  private static volatile boolean running = true;
 
   @SuppressWarnings("MemberName")
   public static class CameraConfig {
@@ -244,14 +235,14 @@ public final class Main {
    */
   public static VideoSource startCamera(CameraConfig config) {
     System.out.println("Starting camera '" + config.name + "' on " + config.path);
-    CameraServer inst = CameraServer.getInstance();
+    // CameraServer inst = CameraServer.getInstance();
     UsbCamera camera = new UsbCamera(config.name, config.path);
     // MjpegServer server = inst.startAutomaticCapture(camera);
 
-    // Gson gson = new GsonBuilder().create();
+    Gson gson = new GsonBuilder().create();
 
-    // camera.setConfigJson(gson.toJson(config.config));
-    // camera.setConnectionStrategy(VideoSource.ConnectionStrategy.kKeepOpen);
+    camera.setConfigJson(gson.toJson(config.config));
+    camera.setConnectionStrategy(VideoSource.ConnectionStrategy.kKeepOpen);
 
     // if (config.streamConfig != null) {
     // server.setConfigJson(gson.toJson(config.streamConfig));
@@ -265,8 +256,8 @@ public final class Main {
    */
   public static MjpegServer startSwitchedCamera(SwitchedCameraConfig config) {
     System.out.println("Starting switched camera '" + config.name + "' on " + config.key);
-    MjpegServer server = new MjpegServer("change", "error", 0);// =
-                                                               // CameraServer.addSwitchedCamera(config.name);
+    MjpegServer server = new MjpegServer("change", "error", 0);
+    // CameraServer.addSwitchedCamera(config.name);
 
     // NetworkTableInstance.getDefault()
     // .getEntry(config.key)
@@ -300,10 +291,10 @@ public final class Main {
       configFile = args[0];
     }
 
-    // // read configuration
-    // if (!readConfig()) {
-    // return;
-    // }
+    // read configuration
+    if (!readConfig()) {
+      return;
+    }
 
     // // start NetworkTables
     // NetworkTableInstance networkTableInstance =
@@ -319,56 +310,38 @@ public final class Main {
     // // System.out.println(networkTableInstance);
     // }
 
-    // // start cameras
-    // for (CameraConfig config : cameraConfigs) {
-    // cameras.add(startCamera(config));
-    // }
+    // start cameras
+    for (CameraConfig config : cameraConfigs) {
+      cameras.add(startCamera(config));
+    }
 
-    // // start switched cameras
-    // for (SwitchedCameraConfig config : switchedCameraConfigs) {
-    // startSwitchedCamera(config);
-    // }
+    // start switched cameras
+    for (SwitchedCameraConfig config : switchedCameraConfigs) {
+      startSwitchedCamera(config);
+    }
 
-    // Enable RealSense Camera Configs
-    Config cfg = new Config();
-    cfg.enableStream(Stream.Depth, 640, 480);
-    cfg.enableStream(Stream.Color, Format.Rgb8);
+    // start image processing on camera 0 if present
+    // DepthPipeline depthPipeline = new DepthPipeline();
+    if (cameras.size() >= 1) {
+      // System.err.println("Realsense is Valid: " + cameras.get(0).isValid()
+      // + " Enabled: " + cameras.get(0).isEnabled()
+      // + " Connected:" + cameras.get(0).isConnected());
 
-    Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-      // shutdown camera
-      running = false;
+      // depthPipeline.initialize();
 
-      realSenseFramePipeline.stop();
-      System.out.println("camera has been shutdown!");
-    }));
-
-    realSenseFramePipeline.start(cfg);
-
-    // setting up thread to read data
-    Thread thread = new Thread(() -> {
-      while (running) {
-        readFrames();
-      }
-    });
-    thread.start();
-
-    // // start image processing on camera 0 if present
-    // if (cameras.size() >= 1) {
-    // VisionThread visionThread1 = new VisionThread(cameras.get(0),
-    // new YellowStickyNotePipeline(), pipeline -> {
-    // for (MatOfPoint mat : pipeline.convexHullsOutput()) {
-    // System.out.println(mat.height());
-    // }
-    // });
-    // /*
-    // * something like this for GRIP:
-    // * VisionThread visionThread = new VisionThread(cameras.get(0),
-    // * new GripPipeline(), pipeline -> {
-    // * ...
-    // * });
-    // */
-    // visionThread1.start();
-    // }
+      VisionThread visionThread1 = new VisionThread(cameras.get(0),
+          new HoopTargetRealSenseJava(), pipeline -> {
+            for (MatOfPoint contour : pipeline.filterContoursOutput()) {
+              Rect rect = Imgproc.boundingRect(contour);
+              int midX = (rect.width - rect.x) / 2;
+              int midY = (rect.height - rect.y) / 2;
+              int distance = 0;
+              System.out.println("Distance of (" + rect.x + "," + rect.y
+                  + ") to (" + rect.width + "," + rect.height + ") is " + distance);
+            }
+          });
+      visionThread1.start();
+    }
 
     // loop forever
     for (;;) {
@@ -378,40 +351,6 @@ public final class Main {
         return;
       }
     }
-  }
-
-  private static YellowStickyNotePipeline yellowStickyNotePipeline = new YellowStickyNotePipeline();
-
-  public static void readFrames() {
-    FrameList frames = realSenseFramePipeline.waitForFrames();
-    FrameList alignedFrames = align.process(frames);
-
-    VideoFrame colorFrame = alignedFrames.getColorFrame();
-    DepthFrame depthFrame = alignedFrames.getDepthFrame();
-
-    Mat colorMat = new Mat(colorFrame.getHeight(), colorFrame.getWidth(), CvType.CV_8UC3);
-    colorMat.put(0, 0, colorFrame.getBytes());
-
-    yellowStickyNotePipeline.process(colorMat);
-    for (MatOfPoint hull : yellowStickyNotePipeline.convexHullsOutput()) {
-      System.out.println(depthFrame.getDistance(hull.width() / 2, hull.height() / 2));
-    }
-
-    // Mat testMap = new Mat(depth.getHeight(), depth.getWidth(), CV_16UC1);
-    // int size = (int) (testMap.total() * testMap.elemSize());
-    // byte[] return_buff = new byte[size];
-    // depth.getData(return_buff);
-    // short[] shorts = new short[size / 2];
-    // ByteBuffer.wrap(return_buff).order(ByteOrder.LITTLE_ENDIAN).asShortBuffer().get(shorts);
-    // testMap.put(0, 0, shorts);
-    // // You check a pixel value by using something like this
-    // // (double)testMap.get(depth.getHeight()/2,depth.getWidth()/2)[0];
-
-    colorFrame.release();
-    depthFrame.release();
-
-    alignedFrames.release();
-    frames.release();
   }
 
 }

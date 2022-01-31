@@ -1,13 +1,10 @@
 package org.intel.rs.processing;
 
-import static org.bytedeco.librealsense2.global.realsense2.rs2_create_align;
-import static org.bytedeco.librealsense2.global.realsense2.rs2_frame_add_ref;
-import static org.bytedeco.librealsense2.global.realsense2.rs2_process_frame;
-import static org.bytedeco.librealsense2.global.realsense2.rs2_start_processing_queue;
-
 import org.intel.rs.frame.FrameList;
 import org.intel.rs.frame.FrameQueue;
 import org.intel.rs.types.Stream;
+
+import static org.bytedeco.librealsense2.global.realsense2.*;
 import org.intel.rs.util.RealSenseError;
 
 public class Align extends ProcessingBlock {

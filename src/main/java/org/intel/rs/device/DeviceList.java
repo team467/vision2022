@@ -1,19 +1,16 @@
 package org.intel.rs.device;
 
-import static org.bytedeco.librealsense2.global.realsense2.rs2_create_device;
-import static org.bytedeco.librealsense2.global.realsense2.rs2_delete_device_list;
-import static org.bytedeco.librealsense2.global.realsense2.rs2_device_list_contains;
-import static org.bytedeco.librealsense2.global.realsense2.rs2_get_device_count;
-import static org.intel.rs.util.RealSenseUtil.toBoolean;
-
-import java.util.Iterator;
-
 import org.bytedeco.librealsense2.rs2_device;
 import org.bytedeco.librealsense2.rs2_device_list;
 import org.intel.rs.util.NativeDecorator;
 import org.intel.rs.util.NativeList;
 import org.intel.rs.util.NativeListIterator;
 import org.intel.rs.util.RealSenseError;
+
+import java.util.Iterator;
+
+import static org.bytedeco.librealsense2.global.realsense2.*;
+import static org.intel.rs.util.RealSenseUtil.toBoolean;
 
 public class DeviceList implements NativeDecorator<rs2_device_list>, NativeList<Device> {
     protected rs2_device_list instance;

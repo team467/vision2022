@@ -29,7 +29,8 @@ public class CameraOption {
             FloatPointer max = new FloatPointer(1);
             FloatPointer step = new FloatPointer(1);
             FloatPointer defaultValue = new FloatPointer(1);
-            rs2_get_option_range(options, option.getIndex(), min, max, step, defaultValue, RealSenseError.getInstance());
+            rs2_get_option_range(options, option.getIndex(), min, max, step, defaultValue,
+                    RealSenseError.getInstance());
             RealSenseError.checkError();
 
             this.min = min.get();
@@ -74,7 +75,8 @@ public class CameraOption {
     }
 
     public String getValueDescription(float value) {
-        BytePointer strPtr = rs2_get_option_value_description(options, option.getIndex(), value, RealSenseError.getInstance());
+        BytePointer strPtr = rs2_get_option_value_description(options, option.getIndex(), value,
+                RealSenseError.getInstance());
         RealSenseError.checkError();
         return strPtr.toString();
     }

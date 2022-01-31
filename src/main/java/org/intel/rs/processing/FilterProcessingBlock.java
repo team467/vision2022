@@ -23,7 +23,6 @@ public abstract class FilterProcessingBlock extends ProcessingBlock {
         RealSenseError.checkError();
     }
 
-    @SuppressWarnings({"unchecked"})
     public <T extends Frame> T process(VideoFrame original) {
         rs2_frame_add_ref(original.getInstance(), RealSenseError.getInstance());
         RealSenseError.checkError();

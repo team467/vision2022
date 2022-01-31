@@ -67,7 +67,6 @@ public class FrameList extends Frame implements NativeList<Frame> {
         return getFirstOrDefault(stream, Format.Any);
     }
 
-    @SuppressWarnings({ "unchecked" })
     public <T extends Frame> T getFirstOrDefault(Stream stream, Format format) {
         for (Frame frame : this) {
             StreamProfile profile = frame.getProfile();

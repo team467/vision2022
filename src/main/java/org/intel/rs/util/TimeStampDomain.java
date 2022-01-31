@@ -1,8 +1,6 @@
 package org.intel.rs.util;
 
-import static org.bytedeco.librealsense2.global.realsense2.RS2_TIMESTAMP_DOMAIN_COUNT;
-import static org.bytedeco.librealsense2.global.realsense2.RS2_TIMESTAMP_DOMAIN_HARDWARE_CLOCK;
-import static org.bytedeco.librealsense2.global.realsense2.RS2_TIMESTAMP_DOMAIN_SYSTEM_TIME;
+import static org.bytedeco.librealsense2.global.realsense2.*;
 
 public class TimeStampDomain {
     int instance;

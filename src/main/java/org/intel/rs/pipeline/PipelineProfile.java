@@ -1,8 +1,7 @@
 package org.intel.rs.pipeline;
 
-import static org.bytedeco.librealsense2.global.realsense2.rs2_delete_pipeline_profile;
-import static org.bytedeco.librealsense2.global.realsense2.rs2_pipeline_profile_get_device;
-import static org.bytedeco.librealsense2.global.realsense2.rs2_pipeline_profile_get_streams;
+import org.intel.rs.util.RealSenseError;
+import static org.bytedeco.librealsense2.global.realsense2.*;
 
 import org.bytedeco.librealsense2.rs2_device;
 import org.bytedeco.librealsense2.rs2_pipeline_profile;
@@ -10,7 +9,6 @@ import org.bytedeco.librealsense2.rs2_stream_profile_list;
 import org.intel.rs.device.Device;
 import org.intel.rs.stream.StreamProfileList;
 import org.intel.rs.util.NativeDecorator;
-import org.intel.rs.util.RealSenseError;
 
 public class PipelineProfile implements NativeDecorator<rs2_pipeline_profile> {
     rs2_pipeline_profile instance;

@@ -64,7 +64,6 @@ public class Frame implements NativeDecorator<rs2_frame> {
         return dataPtr;
     }
 
-    @SuppressWarnings({ "all" })
     public ByteBuffer getData() {
         Pointer dataPtr = getDataPointer();
         int size = getDataSize();
@@ -75,7 +74,6 @@ public class Frame implements NativeDecorator<rs2_frame> {
         return ptr.asBuffer();
     }
 
-    @SuppressWarnings({ "all" })
     public byte[] getBytes() {
         Pointer dataPtr = getDataPointer();
         int size = getDataSize();
@@ -88,6 +86,7 @@ public class Frame implements NativeDecorator<rs2_frame> {
         ByteBuffer managedPixels = ByteBuffer.allocate(rawPixels.capacity());
         managedPixels.put(rawPixels);
 
+        ptr.close();
         return managedPixels.array();
     }
 
@@ -98,7 +97,6 @@ public class Frame implements NativeDecorator<rs2_frame> {
         return new StreamProfile(streamProfile);
     }
 
-    @SuppressWarnings({ "unchecked" })
     public <T extends StreamProfile> T getProfileEx() {
         return (T) getProfile();
     }

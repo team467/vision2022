@@ -1,15 +1,13 @@
 package org.intel.rs.frame;
 
-import static org.bytedeco.librealsense2.global.realsense2.rs2_get_frame_bits_per_pixel;
-import static org.bytedeco.librealsense2.global.realsense2.rs2_get_frame_height;
-import static org.bytedeco.librealsense2.global.realsense2.rs2_get_frame_stride_in_bytes;
-import static org.bytedeco.librealsense2.global.realsense2.rs2_get_frame_width;
-
-import java.nio.ByteBuffer;
+import static org.bytedeco.librealsense2.global.realsense2.*;
 
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacpp.Pointer;
-import org.bytedeco.librealsense2.rs2_frame;
+import org.bytedeco.librealsense2.*;
+
+import java.nio.ByteBuffer;
+
 import org.intel.rs.util.RealSenseError;
 
 public class VideoFrame extends Frame {
@@ -63,13 +61,12 @@ public class VideoFrame extends Frame {
         ptr.capacity(size);
 
         ByteBuffer rawPixels = ptr.asBuffer();
+        ptr.close();
 
         for (int i = 0; i < pixels.length; i++) {
             pixels[i] = ((rawPixels.get() & 0xFF) << 16)
                     | ((rawPixels.get() & 0xFF) << 8)
                     | ((rawPixels.get() & 0xFF));
         }
-
-        ptr.close();
     }
 }

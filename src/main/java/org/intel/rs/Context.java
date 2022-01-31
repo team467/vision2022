@@ -1,14 +1,16 @@
 package org.intel.rs;
 
-import static org.bytedeco.librealsense2.global.realsense2.*;
-
 import org.bytedeco.javacpp.Pointer;
-import org.bytedeco.librealsense2.*;
+import org.bytedeco.librealsense2.rs2_context;
+import org.bytedeco.librealsense2.rs2_device_list;
+import org.bytedeco.librealsense2.rs2_devices_changed_callback_ptr;
 import org.intel.rs.device.DeviceList;
 import org.intel.rs.device.OnDevicesChangedCallback;
 import org.intel.rs.util.NativeDecorator;
-import org.intel.rs.util.RealSenseError;
 
+import static org.bytedeco.librealsense2.global.realsense2.*;
+
+import org.intel.rs.util.RealSenseError;
 public class Context implements NativeDecorator<rs2_context> {
     protected rs2_context instance;
     private OnDevicesChangedCallback onDevicesChangedCallback;
