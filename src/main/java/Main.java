@@ -291,18 +291,18 @@ public final class Main {
     }
 
     // start NetworkTables
-    NetworkTableInstance ntinst = NetworkTableInstance.getDefault();
+    NetworkTableInstance networkTableInstance = NetworkTableInstance.getDefault();
     if (server) {
       System.out.println("Setting up NetworkTables server");
-      ntinst.startServer();
+      networkTableInstance.startServer();
     } else {
       System.out.println("Setting up NetworkTables client for team " + team);
-      ntinst.startClientTeam(team);
-      ntinst.startDSClient();
+      networkTableInstance.startClientTeam(team);
+      networkTableInstance.startDSClient();
     }
 
-    BallProcessor ballProcessor = new BallProcessor(ntinst);
-    HubTargetProcessor hubTargetProcessor = new HubTargetProcessor(ntinst);
+    BallProcessor ballProcessor = new BallProcessor(networkTableInstance);
+    HubTargetProcessor hubTargetProcessor = new HubTargetProcessor(networkTableInstance);
 
     // start cameras
     for (CameraConfig config : cameraConfigs) {
@@ -321,20 +321,13 @@ public final class Main {
 
       VisionThread ballVisionThread = new VisionThread(cameras.get(2),
           new BallPipeline(), pipeline -> {
-            // TODO: get x y
-            int x = 0;
-            int y = 0;
-            boolean isRed = true;
-            ballProcessor.process(x, y, isRed);
+            ballProcessor.process(pipeline);
           });
       ballVisionThread.start();
 
       VisionThread hubTargetVisionThread = new VisionThread(cameras.get(3),
           new HubTargetPipeline(), pipeline -> {
-            // TODO: get x y
-            int x = 0;
-            int y = 0;
-            hubTargetProcessor.process(x, y);
+            hubTargetProcessor.process(pipeline);
           });
       hubTargetVisionThread.start();
 
