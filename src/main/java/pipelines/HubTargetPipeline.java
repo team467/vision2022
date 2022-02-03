@@ -43,9 +43,13 @@ public class HubTargetPipeline implements VisionPipeline {
     public void process(Mat source0) {
         // Step HSL_Threshold0:
         Mat hslThresholdInput = source0;
-        double[] hslThresholdHue = { 34.179315304499696, 71.18633767295309 };
-        double[] hslThresholdSaturation = { 68.79496402877697, 107.04778156996588 };
-        double[] hslThresholdLuminance = { 98.60611510791367, 174.49658703071674 };
+        // double[] hslThresholdHue = { 34.179315304499696, 71.18633767295309 };
+        // double[] hslThresholdSaturation = { 68.79496402877697, 107.04778156996588 };
+        // double[] hslThresholdLuminance = { 98.60611510791367, 174.49658703071674 };
+
+        double[] hslThresholdHue = { 76.2654624684014, 151.04963513027192 };
+        double[] hslThresholdSaturation = { 255.0, 255.0 };
+        double[] hslThresholdLuminance = { 151.34892086330936, 252.85353535353534 };
         hslThreshold(hslThresholdInput, hslThresholdHue, hslThresholdSaturation, hslThresholdLuminance,
                 hslThresholdOutput);
 
@@ -56,26 +60,52 @@ public class HubTargetPipeline implements VisionPipeline {
 
         // Step Filter_Contours0:
         ArrayList<MatOfPoint> filterContoursContours = findContoursOutput;
-        double filterContoursMinArea = 0;
-        double filterContoursMinPerimeter = 0;
-        double filterContoursMinWidth = 0;
-        double filterContoursMaxWidth = 1000;
-        double filterContoursMinHeight = 0;
-        double filterContoursMaxHeight = 1000;
-        double[] filterContoursSolidity = { 0, 100 };
-        double filterContoursMaxVertices = 1000000;
-        double filterContoursMinVertices = 0;
-        double filterContoursMinRatio = 0;
-        double filterContoursMaxRatio = 1000;
+        double filterContoursMinArea = 0.0;
+        double filterContoursMinPerimeter = 0.0; // This is breaking it put it 0
+        double filterContoursMinWidth = 0.0; // This is problem
+        double filterContoursMaxWidth = 150.0; // This isnt the problem but it needs to be fine tuned
+        double filterContoursMinHeight = 0.0; // This is the problem
+        double filterContoursMaxHeight = 55.0; // Working
+        double[] filterContoursSolidity = { 82.62589928057554, 100.0 }; // Working
+        double filterContoursMaxVertices = 6000000000000000000.0; // This is the problem
+        double filterContoursMinVertices = 0.0; // Working
+        double filterContoursMinRatio = 0.0; // Working
+        double filterContoursMaxRatio = 1.0E14; // Working
+
+        // double filterContoursMinArea = 0.0;
+        // double filterContoursMinPerimeter = 215.0;
+        // double filterContoursMinWidth = 81.0;
+        // double filterContoursMaxWidth = 150.0;
+        // double filterContoursMinHeight = 25.0;
+        // double filterContoursMaxHeight = 55.0;
+        // double[] filterContoursSolidity = {82.62589928057554, 100.0};
+        // double filterContoursMaxVertices = 0.0;
+        // double filterContoursMinVertices = 0.0;
+        // double filterContoursMinRatio = 0.0;
+        // double filterContoursMaxRatio = 1.0E14;
+
+        // double filterContoursMinArea = 0.0;
+        // double filterContoursMinPerimeter = 215.0;
+        // double filterContoursMinWidth = 81.0;
+        // double filterContoursMaxWidth = 150.0;
+        // double filterContoursMinHeight = 25.0;
+        // double filterContoursMaxHeight = 55.0;
+        // double[] filterContoursSolidity = {82.62589928057554, 100.0};
+        // double filterContoursMaxVertices = 60.0;
+        // double filterContoursMinVertices = 15.0;
+        // double filterContoursMinRatio = 0.0;
+        // double filterContoursMaxRatio = 1.0E14;
         filterContours(filterContoursContours, filterContoursMinArea, filterContoursMinPerimeter,
                 filterContoursMinWidth, filterContoursMaxWidth, filterContoursMinHeight, filterContoursMaxHeight,
                 filterContoursSolidity, filterContoursMaxVertices, filterContoursMinVertices, filterContoursMinRatio,
                 filterContoursMaxRatio, filterContoursOutput);
 
-        // Step Convex_Hulls0:
-        ArrayList<MatOfPoint> convexHullsContours = filterContoursOutput;
-        convexHulls(convexHullsContours, convexHullsOutput);
+        // // Step Convex_Hulls0:
+        // ArrayList<MatOfPoint> convexHullsContours = filterContoursOutput;
+        // convexHulyls(convexHullsContours, convexHullsOutput);
 
+        // System.out.println("con0: " + findContoursOutput.size() + " filter0: " +
+        // filterContoursOutput.size() + " hulls0: " + convexHullsOutput.size());
     }
 
     /**
@@ -123,11 +153,9 @@ public class HubTargetPipeline implements VisionPipeline {
      * @param lum    The min and max luminance
      * @param output The image in which to store the output.
      */
-    private void hslThreshold(Mat input, double[] hue, double[] sat, double[] lum,
-            Mat out) {
+    private void hslThreshold(Mat input, double[] hue, double[] sat, double[] lum, Mat out) {
         Imgproc.cvtColor(input, out, Imgproc.COLOR_BGR2HLS);
-        Core.inRange(out, new Scalar(hue[0], lum[0], sat[0]),
-                new Scalar(hue[1], lum[1], sat[1]), out);
+        Core.inRange(out, new Scalar(hue[0], lum[0], sat[0]), new Scalar(hue[1], lum[1], sat[1]), out);
     }
 
     /**
@@ -139,8 +167,7 @@ public class HubTargetPipeline implements VisionPipeline {
      * @param maskSize the size of the mask.
      * @param output   The image in which to store the output.
      */
-    private void findContours(Mat input, boolean externalOnly,
-            List<MatOfPoint> contours) {
+    private void findContours(Mat input, boolean externalOnly, List<MatOfPoint> contours) {
         Mat hierarchy = new Mat();
         contours.clear();
         int mode;
@@ -170,16 +197,20 @@ public class HubTargetPipeline implements VisionPipeline {
      * @param minRatio       minimum ratio of width to height
      * @param maxRatio       maximum ratio of width to height
      */
-    private void filterContours(List<MatOfPoint> inputContours, double minArea,
-            double minPerimeter, double minWidth, double maxWidth, double minHeight, double maxHeight,
-            double[] solidity, double maxVertexCount, double minVertexCount, double minRatio, double maxRatio,
-            List<MatOfPoint> output) {
+    private void filterContours(List<MatOfPoint> inputContours, double minArea, double minPerimeter, double minWidth,
+            double maxWidth, double minHeight, double maxHeight, double[] solidity, double maxVertexCount,
+            double minVertexCount, double minRatio, double maxRatio, List<MatOfPoint> output) {
         final MatOfInt hull = new MatOfInt();
         output.clear();
         // operation
         for (int i = 0; i < inputContours.size(); i++) {
             final MatOfPoint contour = inputContours.get(i);
             final Rect bb = Imgproc.boundingRect(contour);
+
+            // System.out.println("Contours before filter -  (x,y) =  (" + bb.x + "," + bb.y + ") "
+            //         + " (width, height) =  (" + bb.width + "," + bb.height + ") " + " Contour Size = " + contour.size()
+            //         + "Contour Element Size -" + contour.elemSize());
+
             if (bb.width < minWidth || bb.width > maxWidth)
                 continue;
             if (bb.height < minHeight || bb.height > maxHeight)
@@ -215,8 +246,7 @@ public class HubTargetPipeline implements VisionPipeline {
      * @param inputContours  The contours on which to perform the operation.
      * @param outputContours The contours where the output will be stored.
      */
-    private void convexHulls(List<MatOfPoint> inputContours,
-            ArrayList<MatOfPoint> outputContours) {
+    private void convexHulls(List<MatOfPoint> inputContours, ArrayList<MatOfPoint> outputContours) {
         final MatOfInt hull = new MatOfInt();
         outputContours.clear();
         for (int i = 0; i < inputContours.size(); i++) {

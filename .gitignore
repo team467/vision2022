@@ -1,0 +1,17 @@
+.gradle/5.0/javaCompile/classAnalysis.bin
+.gradle/5.0/javaCompile/javaCompile.lock
+.gradle/5.0/taskHistory/taskHistory.bin
+.gradle/5.0/taskHistory/taskHistory.lock
+.gradle/buildOutputCleanup/buildOutputCleanup.lock
+bin/main/pipelines/HubTargetPipeline.class
+bin/main/processing/HubTargetProcessor.class
+build/classes/java/main/FindTargetJava.class
+build/classes/java/main/Main.class
+build/classes/java/main/Main$CameraConfig.class
+build/classes/java/main/Main$SwitchedCameraConfig.class
+build/classes/java/main/pipelines/BallPipeline.class
+build/classes/java/main/pipelines/HubTargetPipeline.class
+build/classes/java/main/processing/BallProcessor.class
+build/classes/java/main/processing/HubTargetProcessor.class
+build/libs/vision2022-all.jar
+build/libs/vision2022.jar
