@@ -317,7 +317,8 @@ public final class Main {
     // start image processing on camera 0 if present
     if (cameras.size() >= 1) {
 
-      // TODO: Figure out how to send 2 camera feeds to driver station
+      // TODO: Test cameras
+      // TODO: Check ball pipeline, sending 2?
 
       VisionThread ballVisionThread = new VisionThread(cameras.get(2),
           new BallPipeline(), pipeline -> {
