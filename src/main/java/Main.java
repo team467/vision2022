@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import com.google.gson.Gson;
@@ -22,19 +21,11 @@ import edu.wpi.cscore.VideoSource;
 import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.networktables.EntryListenerFlags;
 import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.vision.VisionPipeline;
 import edu.wpi.first.vision.VisionThread;
-
-import org.opencv.core.Core;
-import org.opencv.core.CvType;
-import org.opencv.core.Mat;
-import org.opencv.core.MatOfInt;
-import org.opencv.core.MatOfPoint;
-import org.opencv.core.MatOfPoint2f;
-import org.opencv.core.Rect;
-import org.opencv.core.Scalar;
-import org.opencv.imgproc.Imgproc;
-import java.util.Scanner;
+import pipelines.BallPipeline;
+import pipelines.HubTargetPipeline;
+import processing.BallProcessor;
+import processing.HubTargetProcessor;
 
 /*
    JSON format:
@@ -242,16 +233,16 @@ public final class Main {
     System.out.println("Starting camera '" + config.name + "' on " + config.path);
     CameraServer inst = CameraServer.getInstance();
     UsbCamera camera = new UsbCamera(config.name, config.path);
-   // MjpegServer server = inst.startAutomaticCapture(camera);
+    MjpegServer server = inst.startAutomaticCapture(camera);
 
-   // Gson gson = new GsonBuilder().create();
+    Gson gson = new GsonBuilder().create();
 
-  //  camera.setConfigJson(gson.toJson(config.config));
-   // camera.setConnectionStrategy(VideoSource.ConnectionStrategy.kKeepOpen);
+    camera.setConfigJson(gson.toJson(config.config));
+    camera.setConnectionStrategy(VideoSource.ConnectionStrategy.kKeepOpen);
 
-   // if (config.streamConfig != null) {
-   //   server.setConfigJson(gson.toJson(config.streamConfig));
-   // }
+    if (config.streamConfig != null) {
+      server.setConfigJson(gson.toJson(config.streamConfig));
+    }
 
     return camera;
   }
@@ -261,9 +252,7 @@ public final class Main {
    */
   public static MjpegServer startSwitchedCamera(SwitchedCameraConfig config) {
     System.out.println("Starting switched camera '" + config.name + "' on " + config.key);
-
-    MjpegServer server = new MjpegServer("change", "error", 0);
-    /*MjpegServer server = CameraServer.getInstance().addSwitchedCamera(config.name);
+    MjpegServer server = CameraServer.getInstance().addSwitchedCamera(config.name);
 
     NetworkTableInstance.getDefault().getEntry(config.key).addListener(event -> {
       if (event.value.isDouble()) {
@@ -281,14 +270,14 @@ public final class Main {
         }
       }
     }, EntryListenerFlags.kImmediate | EntryListenerFlags.kNew | EntryListenerFlags.kUpdate);
-*/
+
     return server;
   }
 
   /**
-   * Example pipeline.
+   * Main.
    */
-    public static void main(String... args) {
+  public static void main(String... args) {
     if (args.length > 0) {
       configFile = args[0];
     }
@@ -300,7 +289,6 @@ public final class Main {
 
     // start NetworkTables
     NetworkTableInstance ntinst = NetworkTableInstance.getDefault();
-
     if (server) {
       System.out.println("Setting up NetworkTables server");
       ntinst.startServer();
@@ -308,43 +296,40 @@ public final class Main {
       System.out.println("Setting up NetworkTables client for team " + team);
       ntinst.startClientTeam(team);
       ntinst.startDSClient();
-      // System.out.println(ntinst);
     }
+
+    BallProcessor ballProcessor = new BallProcessor(ntinst);
+    HubTargetProcessor hubTargetProcessor = new HubTargetProcessor(ntinst);
 
     // start cameras
     for (CameraConfig config : cameraConfigs) {
       cameras.add(startCamera(config));
     }
 
-    // start switched camerass
+    // start switched cameras
     for (SwitchedCameraConfig config : switchedCameraConfigs) {
       startSwitchedCamera(config);
     }
 
     // start image processing on camera 0 if present
     if (cameras.size() >= 1) {
-      VisionThread visionThread = new VisionThread(cameras.get(0), new FindTargetJava(), pipeline -> {
 
-        if (!pipeline.convexHullsOutput.isEmpty()) { // added by Jash
-          // System.out.println(pipeline.convexHullsOutput.get(0).height());
+      // TODO: Figure out how to send 2 camera feeds to driver station
 
-        }
+      // VisionThread ballVisionThread = new VisionThread(cameras.get(2), new BallPipeline(), pipeline -> {
+      //   // TODO: get x yv
+      //   int x = 0;
+      //   int y = 0;
+      //   boolean isRed = true;
+      //   ballProcessor.process(x, y, isRed);
+      // });
+      // ballVisionThread.start();
 
-        // else{ System.out.println("Contour not found");
-
-        // }
-        // Rect r = Imgproc.boundingRect(pipeline.convexHullsOutput().get(0));
-        // double centerX = r.x + (r.width / 2);
-        // System.out.println(centerX);
+      VisionThread hubTargetVisionThread = new VisionThread(cameras.get(0), new HubTargetPipeline(), pipeline -> {
+        hubTargetProcessor.process(pipeline);
       });
+      hubTargetVisionThread.start();
 
-      /*
-       * something like this for GRIP: VisionThread visionThread = new
-       * VisionThread(cameras.get(0), new GripPipeline(), pipeline -> { ... });
-       */
-      String visionThreadName =  visionThread.getName();
-      System.out.println("VisionThreadName: "  + visionThreadName);
-      visionThread.start();
     }
 
     // loop forever
