@@ -1,7 +1,6 @@
-bin/main/*.class
-bin/*
-.gradle*
-build/*
+bin/
+.gradle
+build/
 .classpath
 *.class
 
