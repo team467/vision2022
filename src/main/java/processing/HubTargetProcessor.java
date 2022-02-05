@@ -1,8 +1,5 @@
 package processing;
 
-import java.util.ArrayList;
-import java.util.Collections;
-
 import org.opencv.core.MatOfPoint;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.core.Rect;
@@ -15,6 +12,8 @@ import pipelines.HubTargetPipeline;
 public class HubTargetProcessor {
 
     public static final String NETWORK_TABLE_NAME = "hub_target";
+
+    public static final int RANGE = 50;
 
     private NetworkTable table;
 
@@ -29,33 +28,34 @@ public class HubTargetProcessor {
 
         HubTargetPipeline hubTargetPipeline = (HubTargetPipeline) pipeline;
 
-        // Scanner scanner = new Scanner(System.in);
-
-        ArrayList<Integer> yArray = new ArrayList<Integer>();
         System.out.println("Filter Counters - IN:" + hubTargetPipeline.findContoursOutput().size() + " OUT:"
                 + hubTargetPipeline.filterContoursOutput().size());
         int i = 0;
+        int beforeMean = 0;
         for (MatOfPoint contour : hubTargetPipeline.filterContoursOutput()) {
             Rect box = Imgproc.boundingRect(contour);
+            beforeMean += box.y;
+            i++;
+        }
 
-           // if (contour.size().height == 1 && contour.size().width == 1) {
+        beforeMean /= i;
 
-                System.out.println(" (x,y) =  (" + box.x + "," + box.y + ") " + " (width, height) =  (" + box.width
-                        + "," + box.height + ") " + " Contour Size = " + contour.size());
+        System.out.println(" beforeMain " + beforeMean);
 
-                yArray.add(box.y);
-
-        //    } // System.out.println(contour.height() + "Done");
-
-            if (hubTargetPipeline.filterContoursOutput().isEmpty()) {
-                System.out.println("darn");
+        i = 0;
+        for (MatOfPoint contour : hubTargetPipeline.filterContoursOutput()) {
+            Rect box = Imgproc.boundingRect(contour);
+            if (Math.abs(beforeMean - box.y) < RANGE) {
+                x += box.x;
+                y += box.y;
+                i++;
             }
         }
 
-        Collections.sort(yArray);
-        if (yArray.size() > 3) {
+        x /= i;
+        y /= i;
 
-        }
+        System.out.println(" X " + x + "; Y " + y );
 
         calcDistance(y);
         calcAngle(x);
