@@ -302,7 +302,7 @@ public final class Main {
     }
 
     BallProcessor ballProcessor = new BallProcessor(networkTableInstance);
-    HubTargetProcessor hubTargetProcessor = new HubTargetProcessor(networkTableInstance);
+    //HubTargetProcessor hubTargetProcessor = new HubTargetProcessor(networkTableInstance);
 
     // start cameras
     for (CameraConfig config : cameraConfigs) {
@@ -319,18 +319,18 @@ public final class Main {
 
       // TODO: Figure out how to send 2 camera feeds to driver station
 
-      VisionThread ballVisionThread = new VisionThread(cameras.get(2),
+      VisionThread ballVisionThread = new VisionThread(cameras.get(0),
           new BallPipeline(), pipeline -> {
             ballProcessor.process(pipeline);
           });
       ballVisionThread.start();
-
+/*
       VisionThread hubTargetVisionThread = new VisionThread(cameras.get(3),
           new HubTargetPipeline(), pipeline -> {
             hubTargetProcessor.process(pipeline);
           });
       hubTargetVisionThread.start();
-
+*/
     }
 
     // loop forever

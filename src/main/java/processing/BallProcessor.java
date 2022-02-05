@@ -39,31 +39,42 @@ public class BallProcessor extends Processor {
         blueAngle = blueTable.getEntry("Angle");
     }
 
-
-
     public void process(VisionPipeline pipeline) {
         BallPipeline ballPipeline = (BallPipeline) pipeline;
         Rect boundingRectRed = ballPipeline.boundingRectRed;
         Rect boundingRectBlue = ballPipeline.boundingRectBlue;
+        hasRed.setBoolean(false);
         if (boundingRectRed != null){
             int topLeftY = boundingRectRed.y;
-            int centerX = boundingRectRed.x + boundingRectRed.width/2; 
+            //int topLeftX = CAMERA_X_RESOLUTION - boundingRectRed.x;
+            int centerX = (boundingRectRed.x + boundingRectRed.width/2); 
             double distanceToTargetRed = distance(topLeftY);
             double turningAngleRed = angle(centerX);
             hasRed.setBoolean(true);
             redDistance.setDouble(distanceToTargetRed);
             redAngle.setDouble(turningAngleRed);
+            System.out.println("Area of Red Bounding rect = " + boundingRectRed.area());
+            System.out.println("Top left of red rect: " + String.valueOf(topLeftY));
+            System.out.println("Distance to red : " + String.valueOf(distanceToTargetRed));
+            System.out.println("Angle to red : " + String.valueOf(turningAngleRed));
         }
-
+        hasBlue.setBoolean(false);
         if (boundingRectBlue != null)
         {
             int topLeftY = boundingRectBlue.y;
-            int centerX = boundingRectBlue.x + boundingRectBlue.width/2;
+            //int topLeftX = CAMERA_X_RESOLUTION - boundingRectBlue.x;
+            int centerX = (boundingRectBlue.x + boundingRectBlue.width/2);
             double distanceToTargetBlue = distance(topLeftY);
             double turningAngleBlue = angle(centerX);
             hasBlue.setBoolean(true);
             blueDistance.setDouble(distanceToTargetBlue);
             blueAngle.setDouble(turningAngleBlue);
+            System.out.println("Area of Blue Bounding rect = " + boundingRectBlue.area());
+            System.out.println("Top left of blue rect: " + String.valueOf(topLeftY));
+            System.out.println("Distance to blue : " + String.valueOf(distanceToTargetBlue));
+            System.out.println("Angle to blue : " + String.valueOf(turningAngleBlue));
+
+            //String.valueOf(topLeftX)
         }
     }
 

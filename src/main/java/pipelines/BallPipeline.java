@@ -43,7 +43,7 @@ public class BallPipeline implements VisionPipeline {
     Rect boundingRect = null;
     if (contours.size() > 0)
     {
-        System.out.println("found contours");
+        //System.out.println("found contours");
         double contourArea;
         double maxContourArea = 0;
         int maxContourIdx = 0;
@@ -57,13 +57,13 @@ public class BallPipeline implements VisionPipeline {
             }
         }
 
-        Scalar rectColor = new Scalar(0,255,0);
+        //Scalar rectColor = new Scalar(0,255,0);
 
         boundingRect = Imgproc.boundingRect(contours.get(maxContourIdx));
         //Imgproc.rectangle(frame,rect.tl(),rect.br(),rectColor,2);
         //HighGui.imshow("colorTest", frame);
-        System.out.println("Area of Bounding rect = " + boundingRect.area());
-        System.out.println("Top left of rect: " + boundingRect.toString());
+        //System.out.println("Area of Bounding rect = " + boundingRect.area());
+        //System.out.println("Top left of rect: " + boundingRect.toString());
     }
     return boundingRect;
   }
@@ -100,8 +100,8 @@ public class BallPipeline implements VisionPipeline {
 
   public void findBoundingRect(Mat frame)
   {
-    System.out.println("blue bounding rect " + boundingRectBlue);
-    System.out.println("red bounding rect " + boundingRectRed);
+    //System.out.println("blue bounding rect " + boundingRectBlue);
+    //System.out.println("red bounding rect " + boundingRectRed);
     findBoundingRectBlue(frame);
     findBoundingRectRed(frame);
   }
