@@ -11,9 +11,9 @@ import pipelines.HubTargetPipeline;
 public class HubTargetProcessor extends Processor {
 
     public static final String NETWORK_TABLE_NAME = "hub_target";
-    public static final double TARGET_HEIGHT_FT = 1.4583; // 8.700;
-    public static final double CAMERA_HEIGHT_FT = 0.83; // 2.875;
-    public static final double UP_ANGLE_DEG = 0.0;// 45.0;
+    public static final double TARGET_HEIGHT_FT =  8.700;
+    public static final double CAMERA_HEIGHT_FT =  2.875;
+    public static final double UP_ANGLE_DEG =  45.0;
     public static final double TURN_ANGLE_OFFSET_DEG = 0.0;
 
     public static final int RANGE = 50;
