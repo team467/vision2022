@@ -16,6 +16,7 @@ public class HubTargetProcessor extends Processor {
     public static final double CAMERA_HEIGHT_FT = 2.875;
     public static final double UP_ANGLE_DEG = 45.0;
     public static final double TURN_ANGLE_OFFSET_DEG = 0.0;
+    public static final int RANGE = 50;
 
     private NetworkTable table;
 
@@ -73,15 +74,11 @@ public class HubTargetProcessor extends Processor {
 
     public void calcAngle(int x) {
 
-        double angle = (x - CAMERA_X_RESOLUTION / 2.0) / PIXELS_PER_DEGREE + TURN_ANGLE_OFFSET_DEG;
-        table.getEntry("angle").setDouble(angle);
-        System.out.println(" Angle " + angle);
-
-    private void angle(int x) {
         double angle = (x - CAMERA_X_RESOLUTION / 2.0)
                 / PIXELS_PER_DEGREE
                 + TURN_ANGLE_OFFSET_DEG;
         table.getEntry("angle").setDouble(angle);
+        System.out.println(" Angle " + angle);
     }
 
     public void calcDistance(int y) {
