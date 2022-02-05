@@ -1,9 +1,7 @@
 bin/main/*.class
 bin/*
-.gradle/*
 .gradle*
 build/*
-build*
-*fileHashes*
-.gradle/5.0/fileHashes/fileHashes.bin
-.gradle/5.0/fileHashes/fileHashes.lock
+.classpath
+*.class
+
