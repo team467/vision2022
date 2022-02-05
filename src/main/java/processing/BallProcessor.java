@@ -1,51 +1,83 @@
 package processing;
 
+import org.opencv.core.Rect;
+
 import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.vision.VisionPipeline;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import pipelines.BallPipeline;
 
 public class BallProcessor extends Processor {
 
-    public static final String NETWORK_TABLE_NAME = "balls";
+    public static final String NETWORK_TABLE_NAME = "BallTracking";
     public static final double BALL_HEIGHT_IN = 9.5;
     public static final double CAMERA_HEIGHT_IN = 16.5;
     public static final double DOWN_ANGLE_DEG = 20.0;
     public static final double TURN_ANGLE_OFFSET_DEG = 0.0;
 
-    private NetworkTable table;
+    private NetworkTable redTable;
+    private NetworkTableEntry hasRed;
+    private NetworkTableEntry redDistance;
+    private NetworkTableEntry redAngle;
+    private NetworkTable blueTable;
+    private NetworkTableEntry hasBlue;
+    private NetworkTableEntry blueDistance;
+    private NetworkTableEntry blueAngle;
 
     public BallProcessor(NetworkTableInstance networkTableInstance) {
         super(networkTableInstance);
-        table = smartDashboard.getSubTable(NETWORK_TABLE_NAME);
+        NetworkTable table = networkTableInstance.getTable(NETWORK_TABLE_NAME);
+        redTable = table.getSubTable("Red");
+        hasRed = redTable.getEntry("HasBall");
+        redDistance = redTable.getEntry("Distance");
+        redAngle = redTable.getEntry("Angle");
+        blueTable = table.getSubTable("Blue");
+        hasBlue = blueTable.getEntry("HasBall");
+        blueDistance = blueTable.getEntry("Distance");
+        blueAngle = blueTable.getEntry("Angle");
     }
+
+
 
     public void process(VisionPipeline pipeline) {
         BallPipeline ballPipeline = (BallPipeline) pipeline;
-        distance(1);
-        angle(1);
-        isRed(true);
+        Rect boundingRectRed = ballPipeline.boundingRectRed;
+        Rect boundingRectBlue = ballPipeline.boundingRectBlue;
+        if (boundingRectRed != null){
+            int topLeftY = boundingRectRed.y;
+            int centerX = boundingRectRed.x + boundingRectRed.width/2; 
+            double distanceToTargetRed = distance(topLeftY);
+            double turningAngleRed = angle(centerX);
+            hasRed.setBoolean(true);
+            redDistance.setDouble(distanceToTargetRed);
+            redAngle.setDouble(turningAngleRed);
+        }
+
+        if (boundingRectBlue != null)
+        {
+            int topLeftY = boundingRectBlue.y;
+            int centerX = boundingRectBlue.x + boundingRectBlue.width/2;
+            double distanceToTargetBlue = distance(topLeftY);
+            double turningAngleBlue = angle(centerX);
+            hasBlue.setBoolean(true);
+            blueDistance.setDouble(distanceToTargetBlue);
+            blueAngle.setDouble(turningAngleBlue);
+        }
     }
 
-    private void distance(int y) {
-        double distance = (CAMERA_HEIGHT_IN - BALL_HEIGHT_IN) *
+    private double distance(int y) {
+        return (CAMERA_HEIGHT_IN - BALL_HEIGHT_IN) *
                 Math.tan((90.0 - DOWN_ANGLE_DEG
                         - (y - CAMERA_Y_RESOLUTION / 2.0)
                                 / PIXELS_PER_DEGREE)
                         * DEG_TO_RADIANS);
-        table.getEntry("distance").setDouble(distance);
     }
 
-    private void angle(int x) {
-        double angle = (x - CAMERA_X_RESOLUTION / 2.0)
+    private double angle(int x) {
+        return (x - CAMERA_X_RESOLUTION / 2.0)
                 / PIXELS_PER_DEGREE
                 + TURN_ANGLE_OFFSET_DEG;
-        table.getEntry("angle").setDouble(angle);
     }
-
-    private void isRed(boolean isRed) {
-        table.getEntry("isRed").setBoolean(isRed);
-
-    }
-
 }
