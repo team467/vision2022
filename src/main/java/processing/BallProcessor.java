@@ -44,7 +44,8 @@ public class BallProcessor extends Processor {
         Rect boundingRectRed = ballPipeline.boundingRectRed;
         Rect boundingRectBlue = ballPipeline.boundingRectBlue;
         hasRed.setBoolean(false);
-        if (boundingRectRed != null){
+        if (boundingRectRed != null && ((boundingRectRed.width - boundingRectRed.height) <= 1)
+                                    && (boundingRectRed.size().area() >= 25)){
             int topLeftY = boundingRectRed.y;
             //int topLeftX = CAMERA_X_RESOLUTION - boundingRectRed.x;
             int centerX = (boundingRectRed.x + boundingRectRed.width/2); 
@@ -53,13 +54,21 @@ public class BallProcessor extends Processor {
             hasRed.setBoolean(true);
             redDistance.setDouble(distanceToTargetRed);
             redAngle.setDouble(turningAngleRed);
-            System.out.println("Area of Red Bounding rect = " + boundingRectRed.area());
-            System.out.println("Top left of red rect: " + String.valueOf(topLeftY));
-            System.out.println("Distance to red : " + String.valueOf(distanceToTargetRed));
-            System.out.println("Angle to red : " + String.valueOf(turningAngleRed));
+            //System.out.println("Area of Red Bounding rect = " + boundingRectRed.area());
+            //System.out.println("Top left of red rect: " + String.valueOf(topLeftY));
+            //System.out.println("Distance to red : " + String.valueOf(distanceToTargetRed));
+            //System.out.println("Angle to red : " + String.valueOf(turningAngleRed));
+        }
+        else
+        {
+            hasRed.setBoolean(false);
+            redDistance.setDouble(0);
+            redAngle.setDouble(0);
         }
         hasBlue.setBoolean(false);
-        if (boundingRectBlue != null)
+        
+        if (boundingRectBlue != null && ((boundingRectBlue.width - boundingRectBlue.height) <= 1) 
+                                     && (boundingRectBlue.size().area() > 25))
         {
             int topLeftY = boundingRectBlue.y;
             //int topLeftX = CAMERA_X_RESOLUTION - boundingRectBlue.x;
@@ -69,12 +78,18 @@ public class BallProcessor extends Processor {
             hasBlue.setBoolean(true);
             blueDistance.setDouble(distanceToTargetBlue);
             blueAngle.setDouble(turningAngleBlue);
-            System.out.println("Area of Blue Bounding rect = " + boundingRectBlue.area());
-            System.out.println("Top left of blue rect: " + String.valueOf(topLeftY));
-            System.out.println("Distance to blue : " + String.valueOf(distanceToTargetBlue));
-            System.out.println("Angle to blue : " + String.valueOf(turningAngleBlue));
+            //System.out.println("Area of Blue Bounding rect = " + boundingRectBlue.area());
+            //System.out.println("Top left of blue rect: " + String.valueOf(topLeftY));
+            //System.out.println("Distance to blue : " + String.valueOf(distanceToTargetBlue));
+            //System.out.println("Angle to blue : " + String.valueOf(turningAngleBlue));
 
             //String.valueOf(topLeftX)
+        }
+        else
+        {
+            hasBlue.setBoolean(false);
+            blueDistance.setDouble(0);
+            blueAngle.setDouble(0);
         }
     }
 
