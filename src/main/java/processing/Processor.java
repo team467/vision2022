@@ -6,8 +6,8 @@ import edu.wpi.first.vision.VisionPipeline;
 
 public class Processor {
 
-    public static final int CAMERA_X_RESOLUTION = 1280;
-    public static final int CAMERA_Y_RESOLUTION = 720;
+    public static final int CAMERA_X_RESOLUTION = 640;
+    public static final int CAMERA_Y_RESOLUTION = 480;
     public static final double PIXELS_PER_DEGREE = 21.44;
     public static final double DEG_TO_RADIANS = 2.0 * 3.1415 / 360.0;
 

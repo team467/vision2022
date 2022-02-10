@@ -70,10 +70,10 @@ public class BallPipeline implements VisionPipeline {
 
   public void findBoundingRectBlue(Mat frame)
   {
-    int lowHueBlue = 99;
-    int lowSatBlue = 106;
-    int lowValBlue = 0;
-    int highHueBlue = 105;
+    int lowHueBlue = 58;
+    int lowSatBlue = 228;
+    int lowValBlue = 119;
+    int highHueBlue = 110;
     int highSatBlue = 255;
     int highValBlue = 255;
 
