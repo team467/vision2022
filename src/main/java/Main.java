@@ -15,6 +15,9 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
+import data.BallProcessorData;
+import data.HubTargetPipelineData;
+import data.HubTargetProcessorData;
 import edu.wpi.cscore.MjpegServer;
 import edu.wpi.cscore.UsbCamera;
 import edu.wpi.cscore.VideoSource;
@@ -230,7 +233,7 @@ public final class Main {
    * Start running the camera.
    */
   public static VideoSource startCamera(CameraConfig config) {
-    //System.out.println("Starting camera '" + config.name + "' on " + config.path);
+
     CameraServer inst = CameraServer.getInstance();
     UsbCamera camera = new UsbCamera(config.name, config.path);
     MjpegServer server = inst.startAutomaticCapture(camera);
@@ -251,7 +254,7 @@ public final class Main {
    * Start running the switched camera.
    */
   public static MjpegServer startSwitchedCamera(SwitchedCameraConfig config) {
-    //System.out.println("Starting switched camera '" + config.name + "' on " + config.key);
+
     MjpegServer server = CameraServer.getInstance().addSwitchedCamera(config.name);
 
     NetworkTableInstance.getDefault().getEntry(config.key).addListener(event -> {
@@ -290,20 +293,38 @@ public final class Main {
     // start NetworkTables
     NetworkTableInstance networkTableInstance = NetworkTableInstance.getDefault();
     if (server) {
-      //System.out.println("Setting up NetworkTables server");
+      // System.out.println("Setting up NetworkTables server");
       networkTableInstance.startServer();
     } else {
-      //System.out.println("Setting up NetworkTables client for team " + team);
+      // System.out.println("Setting up NetworkTables client for team " + team);
       networkTableInstance.startClientTeam(team);
       networkTableInstance.startDSClient();
     }
 
-    BallProcessor ballProcessor = new BallProcessor(networkTableInstance);
-    //HubTargetProcessor hubTargetProcessor = new HubTargetProcessor(networkTableInstance);
+    VideoSource hubTargetCamera = null;
+    VideoSource ballTrackingCamera = null;
+
+    // BallProcessorData ballProcessingData = BallProcessorData.get();
+    // // HubTargetProcessorData hubTargetProcessorData =
+    // HubTargetProcessorData.get();
+
+    // ballProcessingData.save();
+    // hubTargetProcessorData.save();
 
     // start cameras
     for (CameraConfig config : cameraConfigs) {
-      cameras.add(startCamera(config));
+      VideoSource camera = startCamera(config);
+      String name = camera.getName();
+      switch (name) {
+        case "Hub Target Camera":
+          hubTargetCamera = camera;
+          break;
+        case "Ball Tracking Camera":
+          ballTrackingCamera = camera;
+          break;
+        default:
+      }
+      cameras.add(camera);
     }
 
     // start switched cameras
@@ -311,24 +332,22 @@ public final class Main {
       startSwitchedCamera(config);
     }
 
-    // start image processing on camera 0 if present
-    if (cameras.size() >= 1) {
-
-      // TODO: Test cameras
-      // TODO: Check ball pipeline, sending 2?
-
-      VisionThread ballVisionThread = new VisionThread(cameras.get(0),
+    if (ballTrackingCamera != null) {
+      BallProcessor ballProcessor = new BallProcessor(ballTrackingCamera, networkTableInstance);
+      VisionThread ballVisionThread = new VisionThread(ballTrackingCamera,
           new BallPipeline(), pipeline -> {
             ballProcessor.process(pipeline);
           });
       ballVisionThread.start();
-/*
-      VisionThread hubTargetVisionThread = new VisionThread(cameras.get(3),
-          new HubTargetPipeline(), pipeline -> {
+    }
+
+    if (hubTargetCamera != null) {
+      HubTargetProcessor hubTargetProcessor = new HubTargetProcessor(hubTargetCamera, networkTableInstance);
+      VisionThread hubTargetVisionThread = new VisionThread(hubTargetCamera,
+          new HubTargetPipeline(networkTableInstance), pipeline -> {
             hubTargetProcessor.process(pipeline);
           });
       hubTargetVisionThread.start();
-*/
     }
 
     // loop forever

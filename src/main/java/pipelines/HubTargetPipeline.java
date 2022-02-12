@@ -13,6 +13,10 @@ import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
 
+import edu.wpi.first.networktables.EntryListenerFlags;
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableEntry;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.vision.VisionPipeline;
 
 /**
@@ -31,8 +35,157 @@ public class HubTargetPipeline implements VisionPipeline {
 	private ArrayList<MatOfPoint> filterContoursOutput = new ArrayList<MatOfPoint>();
 	private ArrayList<MatOfPoint> convexHullsOutput = new ArrayList<MatOfPoint>();
 
+	private double[] hslThresholdHue = { 46.7561222399084, 89.79841567788532 };
+	private double[] hslThresholdSaturation = { 204.09172661870508, 255.0 };
+	private double[] hslThresholdLuminance = { 80.26079136690647, 218.51010101010098 };
+
+	private double filterContoursMinArea = 10.0;
+	private double filterContoursMinPerimeter = 175.0;
+	private double filterContoursMinWidth = 15.0;
+	private double filterContoursMaxWidth = 500.0;
+	private double filterContoursMinHeight = 4.0;
+	private double filterContoursMaxHeight = 95.0;
+	private double[] filterContoursSolidity = { 60.251798561151084, 100 };
+	private double filterContoursMaxVertices = 1000.0;
+	private double filterContoursMinVertices = 30.0;
+	private double filterContoursMinRatio = 0.0;
+	private double filterContoursMaxRatio = 1000.0;
+
+	private NetworkTableEntry ntHslThresholdHueMin;
+	private NetworkTableEntry ntHslThresholdSaturationMin;
+	private NetworkTableEntry ntHslThresholdLuminanceMin;
+	private NetworkTableEntry ntHslThresholdHueMax;
+	private NetworkTableEntry ntHslThresholdSaturationMax;
+	private NetworkTableEntry ntHslThresholdLuminanceMax;
+
+	private NetworkTableEntry ntFilterContoursMinArea;
+	private NetworkTableEntry ntFilterContoursMinPerimeter;
+	private NetworkTableEntry ntFilterContoursMinWidth;
+	private NetworkTableEntry ntFilterContoursMaxWidth;
+	private NetworkTableEntry ntFilterContoursMinHeight;
+	private NetworkTableEntry ntFilterContoursMaxHeight;
+	private NetworkTableEntry ntFilterContoursSolidityMin;
+	private NetworkTableEntry ntFilterContoursSolidityMax;
+	private NetworkTableEntry ntFilterContoursMaxVertices;
+	private NetworkTableEntry ntFilterContoursMinVertices;
+	private NetworkTableEntry ntFilterContoursMinRatio;
+	private NetworkTableEntry ntFilterContoursMaxRatio;
+
 	static {
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
+	}
+
+	public HubTargetPipeline(NetworkTableInstance networkTableInstance) {
+		NetworkTable table = networkTableInstance.getTable("HubTargetPipeline");
+
+		ntHslThresholdHueMin = table.getEntry("HslThresholdHueMin");
+		ntHslThresholdHueMin.setDouble(hslThresholdHue[0]);
+		ntHslThresholdHueMin.addListener(event -> {
+			hslThresholdHue[0] = (int) event.getEntry().getValue().getDouble();
+		}, EntryListenerFlags.kNew | EntryListenerFlags.kUpdate);
+
+		ntHslThresholdHueMax = table.getEntry("HslThresholdHueMax");
+		ntHslThresholdHueMax.setDouble(hslThresholdHue[1]);
+		ntHslThresholdHueMax.addListener(event -> {
+			hslThresholdHue[1] = event.getEntry().getValue().getDouble();
+		}, EntryListenerFlags.kNew | EntryListenerFlags.kUpdate);
+
+		ntHslThresholdSaturationMin = table.getEntry("HslThresholdSaturationMin");
+		ntHslThresholdSaturationMin.setDouble(hslThresholdSaturation[0]);
+		ntHslThresholdSaturationMin.addListener(event -> {
+			hslThresholdSaturation[0] = (int) event.getEntry().getValue().getDouble();
+		}, EntryListenerFlags.kNew | EntryListenerFlags.kUpdate);
+
+		ntHslThresholdSaturationMax = table.getEntry("HslThresholdSaturationMax");
+		ntHslThresholdSaturationMax.setDouble(hslThresholdSaturation[1]);
+		ntHslThresholdSaturationMax.addListener(event -> {
+			hslThresholdSaturation[1] = event.getEntry().getValue().getDouble();
+		}, EntryListenerFlags.kNew | EntryListenerFlags.kUpdate);
+
+		ntHslThresholdLuminanceMin = table.getEntry("HslThresholdLuminanceMin");
+		ntHslThresholdLuminanceMin.setDouble(hslThresholdLuminance[0]);
+		ntHslThresholdLuminanceMin.addListener(event -> {
+			hslThresholdLuminance[0] = (int) event.getEntry().getValue().getDouble();
+		}, EntryListenerFlags.kNew | EntryListenerFlags.kUpdate);
+
+		ntHslThresholdLuminanceMax = table.getEntry("HslThresholdLuminanceMax");
+		ntHslThresholdLuminanceMax.setDouble(hslThresholdLuminance[1]);
+		ntHslThresholdLuminanceMax.addListener(event -> {
+			hslThresholdLuminance[1] = event.getEntry().getValue().getDouble();
+		}, EntryListenerFlags.kNew | EntryListenerFlags.kUpdate);
+
+		ntFilterContoursMinArea = table.getEntry("FilterContoursMinArea");
+		ntFilterContoursMinArea.setDouble(filterContoursMinArea);
+		ntFilterContoursMinArea.addListener(event -> {
+			filterContoursMinArea = event.getEntry().getValue().getDouble();
+		}, EntryListenerFlags.kNew | EntryListenerFlags.kUpdate);
+
+		ntFilterContoursMinPerimeter = table.getEntry("FilterContoursMinPerimeter");
+		ntFilterContoursMinPerimeter.setDouble(filterContoursMinPerimeter);
+		ntFilterContoursMinPerimeter.addListener(event -> {
+			filterContoursMinPerimeter = event.getEntry().getValue().getDouble();
+		}, EntryListenerFlags.kNew | EntryListenerFlags.kUpdate);
+
+		ntFilterContoursMinWidth = table.getEntry("FilterContoursMinWidth");
+		ntFilterContoursMinWidth.setDouble(filterContoursMinWidth);
+		ntFilterContoursMinWidth.addListener(event -> {
+			filterContoursMinWidth = event.getEntry().getValue().getDouble();
+		}, EntryListenerFlags.kNew | EntryListenerFlags.kUpdate);
+
+		ntFilterContoursMaxWidth = table.getEntry("FilterContoursMaxWidth");
+		ntFilterContoursMaxWidth.setDouble(filterContoursMaxWidth);
+		ntFilterContoursMaxWidth.addListener(event -> {
+			filterContoursMaxWidth = event.getEntry().getValue().getDouble();
+		}, EntryListenerFlags.kNew | EntryListenerFlags.kUpdate);
+
+		ntFilterContoursMinHeight = table.getEntry("FilterContoursMinHeight");
+		ntFilterContoursMinHeight.setDouble(filterContoursMinHeight);
+		ntFilterContoursMinHeight.addListener(event -> {
+			filterContoursMinHeight = event.getEntry().getValue().getDouble();
+		}, EntryListenerFlags.kNew | EntryListenerFlags.kUpdate);
+
+		ntFilterContoursMaxHeight = table.getEntry("FilterContoursMaxHeight");
+		ntFilterContoursMaxHeight.setDouble(filterContoursMaxHeight);
+		ntFilterContoursMaxHeight.addListener(event -> {
+			filterContoursMaxHeight = event.getEntry().getValue().getDouble();
+		}, EntryListenerFlags.kNew | EntryListenerFlags.kUpdate);
+
+		ntFilterContoursSolidityMin = table.getEntry("FilterContoursSolidityMin");
+		ntFilterContoursSolidityMin.setDouble(filterContoursSolidity[0]);
+		ntFilterContoursSolidityMin.addListener(event -> {
+			filterContoursSolidity[0] = (int) event.getEntry().getValue().getDouble();
+		}, EntryListenerFlags.kNew | EntryListenerFlags.kUpdate);
+
+		ntFilterContoursSolidityMax = table.getEntry("FilterContoursSolidityMin");
+		ntFilterContoursSolidityMax.setDouble(filterContoursSolidity[1]);
+		ntFilterContoursSolidityMax.addListener(event -> {
+			filterContoursSolidity[1] = event.getEntry().getValue().getDouble();
+		}, EntryListenerFlags.kNew | EntryListenerFlags.kUpdate);
+
+		ntFilterContoursMaxVertices = table.getEntry("FilterContoursMaxVertices");
+		ntFilterContoursMaxVertices.setDouble(filterContoursMaxVertices);
+		ntFilterContoursMaxVertices.addListener(event -> {
+			filterContoursMaxVertices = event.getEntry().getValue().getDouble();
+		}, EntryListenerFlags.kNew | EntryListenerFlags.kUpdate);
+
+		ntFilterContoursMinVertices = table.getEntry("FilterContoursMinVertices");
+		ntFilterContoursMinVertices.setDouble(filterContoursMinVertices);
+		ntFilterContoursMinVertices.addListener(event -> {
+			filterContoursMinVertices = (int) event.getEntry().getValue().getDouble();
+		}, EntryListenerFlags.kNew | EntryListenerFlags.kUpdate);
+
+		ntFilterContoursMinRatio = table.getEntry("FilterContoursMinRatio");
+		ntFilterContoursMinRatio.setDouble(filterContoursMinRatio);
+		ntFilterContoursMinRatio.addListener(event -> {
+			filterContoursMinRatio = event.getEntry().getValue().getDouble();
+		}, EntryListenerFlags.kNew | EntryListenerFlags.kUpdate);
+
+		ntFilterContoursMaxRatio = table.getEntry("FilterContoursMaxRatio");
+		ntFilterContoursMaxRatio.setDouble(filterContoursMaxRatio);
+		ntFilterContoursMaxRatio.addListener(event -> {
+			filterContoursMaxRatio = event.getEntry().getValue().getDouble();
+		}, EntryListenerFlags.kNew | EntryListenerFlags.kUpdate);
+
 	}
 
 	/**
@@ -43,9 +196,6 @@ public class HubTargetPipeline implements VisionPipeline {
 	public void process(Mat source0) {
 		// Step HSL_Threshold0:
 		Mat hslThresholdInput = source0;
-		double[] hslThresholdHue = { 46.7561222399084, 89.79841567788532 };
-		double[] hslThresholdSaturation = { 204.09172661870508, 255.0 };
-		double[] hslThresholdLuminance = { 80.26079136690647, 218.51010101010098 };
 		hslThreshold(hslThresholdInput, hslThresholdHue, hslThresholdSaturation, hslThresholdLuminance,
 				hslThresholdOutput);
 
@@ -56,17 +206,6 @@ public class HubTargetPipeline implements VisionPipeline {
 
 		// Step Filter_Contours0:
 		ArrayList<MatOfPoint> filterContoursContours = findContoursOutput;
-		double filterContoursMinArea = 10.0;
-		double filterContoursMinPerimeter = 175.0;
-		double filterContoursMinWidth = 180.0;
-		double filterContoursMaxWidth = 500.0;
-		double filterContoursMinHeight = 10.0;
-		double filterContoursMaxHeight = 95.0;
-		double[] filterContoursSolidity = { 60.251798561151084, 100 };
-		double filterContoursMaxVertices = 1000.0;
-		double filterContoursMinVertices = 30.0;
-		double filterContoursMinRatio = 0.0;
-		double filterContoursMaxRatio = 1000.0;
 		filterContours(filterContoursContours, filterContoursMinArea, filterContoursMinPerimeter,
 				filterContoursMinWidth, filterContoursMaxWidth, filterContoursMinHeight, filterContoursMaxHeight,
 				filterContoursSolidity, filterContoursMaxVertices, filterContoursMinVertices, filterContoursMinRatio,
