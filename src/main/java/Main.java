@@ -254,25 +254,22 @@ public final class Main {
     //System.out.println("Starting switched camera '" + config.name + "' on " + config.key);
     MjpegServer server = CameraServer.getInstance().addSwitchedCamera(config.name);
 
-    NetworkTableInstance.getDefault()
-        .getEntry(config.key)
-        .addListener(event -> {
-          if (event.value.isDouble()) {
-            int i = (int) event.value.getDouble();
-            if (i >= 0 && i < cameras.size()) {
-              server.setSource(cameras.get(i));
-            }
-          } else if (event.value.isString()) {
-            String str = event.value.getString();
-            for (int i = 0; i < cameraConfigs.size(); i++) {
-              if (str.equals(cameraConfigs.get(i).name)) {
-                server.setSource(cameras.get(i));
-                break;
-              }
-            }
+    NetworkTableInstance.getDefault().getEntry(config.key).addListener(event -> {
+      if (event.value.isDouble()) {
+        int i = (int) event.value.getDouble();
+        if (i >= 0 && i < cameras.size()) {
+          server.setSource(cameras.get(i));
+        }
+      } else if (event.value.isString()) {
+        String str = event.value.getString();
+        for (int i = 0; i < cameraConfigs.size(); i++) {
+          if (str.equals(cameraConfigs.get(i).name)) {
+            server.setSource(cameras.get(i));
+            break;
           }
-        },
-            EntryListenerFlags.kImmediate | EntryListenerFlags.kNew | EntryListenerFlags.kUpdate);
+        }
+      }
+    }, EntryListenerFlags.kImmediate | EntryListenerFlags.kNew | EntryListenerFlags.kUpdate);
 
     return server;
   }
@@ -317,7 +314,8 @@ public final class Main {
     // start image processing on camera 0 if present
     if (cameras.size() >= 1) {
 
-      // TODO: Figure out how to send 2 camera feeds to driver station
+      // TODO: Test cameras
+      // TODO: Check ball pipeline, sending 2?
 
       VisionThread ballVisionThread = new VisionThread(cameras.get(0),
           new BallPipeline(), pipeline -> {

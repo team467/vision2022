@@ -4,11 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.opencv.core.Core;
-import org.opencv.core.CvType;
 import org.opencv.core.Mat;
-import org.opencv.core.MatOfInt;
 import org.opencv.core.MatOfPoint;
-import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
@@ -25,16 +22,15 @@ import edu.wpi.first.vision.VisionPipeline;
  */
 public class BallPipeline implements VisionPipeline {
 
-    public int val;
+  public int val;
   public Rect boundingRectBlue;
   public Rect boundingRectRed;
 
-  public Rect findBoundingRectCommon(Scalar colorLow, Scalar colorHigh, Mat frame)
-  {
+  public Rect findBoundingRectCommon(Scalar colorLow, Scalar colorHigh, Mat frame) {
     Mat frameHSV = new Mat();
     Mat mask = new Mat();
     Mat hierarchy = new Mat();
-    List<MatOfPoint> contours = new ArrayList<>();  
+    List<MatOfPoint> contours = new ArrayList<>();
     Imgproc.cvtColor(frame, frameHSV, Imgproc.COLOR_BGR2HSV);
 
     Core.inRange(frameHSV, colorLow, colorHigh, mask);
@@ -56,6 +52,7 @@ public class BallPipeline implements VisionPipeline {
                 maxContourIdx = contourIdx;
             }
         }
+      
 
         //Scalar rectColor = new Scalar(0,255,0);
 
@@ -77,14 +74,13 @@ public class BallPipeline implements VisionPipeline {
     int highSatBlue = 255;
     int highValBlue = 255;
 
-    Scalar colorLow = new Scalar(lowHueBlue,lowSatBlue,lowValBlue);
-    Scalar colorHigh = new Scalar(highHueBlue,highSatBlue,highValBlue);
+    Scalar colorLow = new Scalar(lowHueBlue, lowSatBlue, lowValBlue);
+    Scalar colorHigh = new Scalar(highHueBlue, highSatBlue, highValBlue);
 
-    boundingRectBlue = findBoundingRectCommon(colorLow,colorHigh,frame);  
+    boundingRectBlue = findBoundingRectCommon(colorLow, colorHigh, frame);
   }
 
-  public void findBoundingRectRed(Mat frame)
-  {
+  public void findBoundingRectRed(Mat frame) {
     int lowHueRed = 0;
     int lowSatRed = 136;
     int lowValRed = 8;
@@ -92,10 +88,10 @@ public class BallPipeline implements VisionPipeline {
     int highSatRed = 255;
     int highValRed = 255;
 
-    Scalar colorLow = new Scalar(lowHueRed,lowSatRed,lowValRed);
-    Scalar colorHigh = new Scalar(highHueRed,highSatRed,highValRed);
+    Scalar colorLow = new Scalar(lowHueRed, lowSatRed, lowValRed);
+    Scalar colorHigh = new Scalar(highHueRed, highSatRed, highValRed);
 
-    boundingRectRed = findBoundingRectCommon(colorLow,colorHigh,frame);
+    boundingRectRed = findBoundingRectCommon(colorLow, colorHigh, frame);
   }
 
   public void findBoundingRect(Mat frame)

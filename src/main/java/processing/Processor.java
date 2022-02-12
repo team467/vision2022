@@ -14,7 +14,7 @@ public class Processor {
     protected NetworkTable smartDashboard;
 
     public Processor(NetworkTableInstance networkTableInstance) {
-        smartDashboard = networkTableInstance.getTable("SmartDashboard");
+        smartDashboard = networkTableInstance.getTable("vision");
     }
 
     public void process(VisionPipeline pipeline) {
