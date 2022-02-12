@@ -1,0 +1,50 @@
+{
+    "team": 467,
+    "ntmode": "client",
+    "cameras": [
+        {
+            "name": "Hub Target Camera",
+            "path": "/dev/video0",
+            "pixel format": "YUYV",
+            "width": 640,
+            "height": 360,
+            "fps": 15,
+            "brightness": 100,
+            "white balance": "auto",
+            "exposure": 0
+        },
+        {
+            "name": "Ball Tracking Camera",
+            "path": "/dev/video0",
+            "pixel format": "YUYV",
+            "width": 640,
+            "height": 360,
+            "fps": 15,
+            "brightness": 100,
+            "white balance": "auto",
+            "exposure": "auto"
+        },
+        {
+            "name": "Driver Front Camera",
+            "path": "/dev/video0",
+            "pixel format": "MJPEG",
+            "width": 640,
+            "height": 360,
+            "fps": 15,
+            "brightness": 50,
+            "white balance": "auto",
+            "exposure": "auto"
+        },
+        {
+            "name": "Driver Back Camera",
+            "path": "/dev/video0",
+            "pixel format": "MJPEG",
+            "width": 640,
+            "height": 360,
+            "fps": 15,
+            "brightness": 50,
+            "white balance": "auto",
+            "exposure": "auto"
+        }
+    ]
+}
