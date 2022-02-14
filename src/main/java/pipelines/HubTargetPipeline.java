@@ -35,21 +35,21 @@ public class HubTargetPipeline implements VisionPipeline {
 	private ArrayList<MatOfPoint> filterContoursOutput = new ArrayList<MatOfPoint>();
 	private ArrayList<MatOfPoint> convexHullsOutput = new ArrayList<MatOfPoint>();
 
-	private double[] hslThresholdHue = { 46.7561222399084, 89.79841567788532 };
-	private double[] hslThresholdSaturation = { 204.09172661870508, 255.0 };
-	private double[] hslThresholdLuminance = { 80.26079136690647, 218.51010101010098 };
+		double[] hslThresholdHue = {53.41726618705036, 73.93939393939391};
+		double[] hslThresholdSaturation = {245.36870503597123, 255.0};
+		double[] hslThresholdLuminance = {18.345323741007192, 255.0};
 
-	private double filterContoursMinArea = 10.0;
-	private double filterContoursMinPerimeter = 175.0;
-	private double filterContoursMinWidth = 15.0;
-	private double filterContoursMaxWidth = 500.0;
-	private double filterContoursMinHeight = 4.0;
-	private double filterContoursMaxHeight = 95.0;
-	private double[] filterContoursSolidity = { 60.251798561151084, 100 };
-	private double filterContoursMaxVertices = 1000.0;
-	private double filterContoursMinVertices = 30.0;
-	private double filterContoursMinRatio = 0.0;
-	private double filterContoursMaxRatio = 1000.0;
+		double filterContoursMinArea = 0.0;
+		double filterContoursMinPerimeter = 1.0;
+		double filterContoursMinWidth = 5.0;
+		double filterContoursMaxWidth = 150.0;
+		double filterContoursMinHeight = 5.0;
+		double filterContoursMaxHeight = 500.0;
+		double[] filterContoursSolidity = {0, 100};
+		double filterContoursMaxVertices = 1000000.0;
+		double filterContoursMinVertices = 0;
+		double filterContoursMinRatio = 0;
+		double filterContoursMaxRatio = 1000;
 
 	private NetworkTableEntry ntHslThresholdHueMin;
 	private NetworkTableEntry ntHslThresholdSaturationMin;

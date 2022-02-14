@@ -62,7 +62,7 @@ public class BallProcessor extends Processor {
     public BallProcessor(VideoSource camera, NetworkTableInstance networkTableInstance) {
         super(camera, networkTableInstance);
 
-        NetworkTable table = networkTableInstance.getTable(NETWORK_TABLE_NAME);
+        NetworkTable table = visionTable.getSubTable(NETWORK_TABLE_NAME);
         redTable = table.getSubTable("Red");
         hasRed = redTable.getEntry("HasBall");
         redDistance = redTable.getEntry("Distance");

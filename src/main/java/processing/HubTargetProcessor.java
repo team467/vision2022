@@ -112,8 +112,10 @@ public class HubTargetProcessor extends Processor {
                 }
             }
 
+            if (i != 0){
             x /= i;
             y /= i;
+            }
 
             calcDistance(y);
             calcAngle(x);
