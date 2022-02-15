@@ -38,7 +38,6 @@ public class BallPipeline implements VisionPipeline {
     Imgproc.findContours(mask, contours, hierarchy, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE);
     Rect boundingRect = null;
     if (contours.size() > 0) {
-      // System.out.println("found contours");
       double contourArea;
       double maxContourArea = 0;
       int maxContourIdx = 0;
@@ -55,10 +54,10 @@ public class BallPipeline implements VisionPipeline {
   }
 
   public void findBoundingRectBlue(Mat frame) {
-    int lowHueBlue = 99;
-    int lowSatBlue = 106;
+    int lowHueBlue = 100;
+    int lowSatBlue = 150;
     int lowValBlue = 0;
-    int highHueBlue = 105;
+    int highHueBlue = 140;
     int highSatBlue = 255;
     int highValBlue = 255;
 

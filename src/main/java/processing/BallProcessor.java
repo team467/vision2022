@@ -2,20 +2,33 @@ package processing;
 
 import org.opencv.core.Rect;
 
+import edu.wpi.cscore.VideoSource;
+import edu.wpi.first.networktables.EntryListenerFlags;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.vision.VisionPipeline;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import pipelines.BallPipeline;
 
 public class BallProcessor extends Processor {
 
     public static final String NETWORK_TABLE_NAME = "BallTracking";
-    public static final double BALL_HEIGHT_IN = 9.5;
-    public static final double CAMERA_HEIGHT_IN = 16.5;
-    public static final double DOWN_ANGLE_DEG = 20.0;
-    public static final double TURN_ANGLE_OFFSET_DEG = 0.0;
+    public static final double BALL_HEIGHT_IN_DEFAULT = 9.5;
+    public static final double CAMERA_HEIGHT_IN_DEFAULT = 16.5;
+    public static final double DOWN_ANGLE_DEG_DEFAULT = 20.0;
+    public static final double TURN_ANGLE_OFFSET_DEG_DEFAULT = 0.0;
+    public static final int MIN_BOUNDING_RECT_WIDTH_DEFAULT = 60;
+    public static final double BOUNDING_RECT_RATIO_DEFAULT = 1.1;
+    public static final double BOUNDING_RECT_RATIO_TOLERANCE_DEFAULT = 0.2;
+
+    private double ballHeight;
+    private double cameraHeight;
+    private double cameraDownAngleDeg;
+    private double cameraTurnOffsetDeg;
+
+    private int minBoundingRectWidth;
+    private double boundingRectRatio;
+    private double boundingRectRatioTolerance;
 
     private NetworkTable redTable;
     private NetworkTableEntry hasRed;
@@ -26,8 +39,29 @@ public class BallProcessor extends Processor {
     private NetworkTableEntry blueDistance;
     private NetworkTableEntry blueAngle;
 
-    public BallProcessor(NetworkTableInstance networkTableInstance) {
-        super(networkTableInstance);
+    private NetworkTableEntry blueWidth;
+    private NetworkTableEntry blueHeight;
+    private NetworkTableEntry blueRatio;
+    private NetworkTableEntry blueX;
+    private NetworkTableEntry blueY;
+    private NetworkTableEntry redWidth;
+    private NetworkTableEntry redHeight;
+    private NetworkTableEntry redRatio;
+    private NetworkTableEntry redX;
+    private NetworkTableEntry redY;
+
+    private NetworkTableEntry ntBallHeight;
+    private NetworkTableEntry ntCameraHeight;
+    private NetworkTableEntry ntCameraDownAngle;
+    private NetworkTableEntry ntCameraTurnOffset;
+
+    private NetworkTableEntry ntMinBoundingRectWidth;
+    private NetworkTableEntry ntBoundingRectRatio;
+    private NetworkTableEntry ntBoundingRectRatioTolerance;
+
+    public BallProcessor(VideoSource camera, NetworkTableInstance networkTableInstance) {
+        super(camera, networkTableInstance);
+
         NetworkTable table = networkTableInstance.getTable(NETWORK_TABLE_NAME);
         redTable = table.getSubTable("Red");
         hasRed = redTable.getEntry("HasBall");
@@ -37,73 +71,132 @@ public class BallProcessor extends Processor {
         hasBlue = blueTable.getEntry("HasBall");
         blueDistance = blueTable.getEntry("Distance");
         blueAngle = blueTable.getEntry("Angle");
+
+        blueWidth = blueTable.getEntry("Width");
+        blueHeight = blueTable.getEntry("Height");
+        blueRatio = blueTable.getEntry("Ratio");
+        blueX = blueTable.getEntry("X");
+        blueY = blueTable.getEntry("Y");
+
+        redWidth = redTable.getEntry("Width");
+        redHeight = redTable.getEntry("Height");
+        redRatio = redTable.getEntry("Ratio");
+        redX = redTable.getEntry("X");
+        redY = redTable.getEntry("Y");
+
+        ntBallHeight = table.getEntry("BallHeight");
+        ballHeight = BALL_HEIGHT_IN_DEFAULT;
+        ntBallHeight.setDouble(ballHeight);
+        ntBallHeight.addListener(event -> {
+            ballHeight = event.getEntry().getValue().getDouble();
+        }, EntryListenerFlags.kNew | EntryListenerFlags.kUpdate);
+
+        ntCameraHeight = table.getEntry("CameraHeight");
+        cameraHeight = CAMERA_HEIGHT_IN_DEFAULT;
+        ntCameraHeight.setDouble(cameraHeight);
+        ntCameraHeight.addListener(event -> {
+            cameraHeight = event.getEntry().getValue().getDouble();
+        }, EntryListenerFlags.kNew | EntryListenerFlags.kUpdate);
+
+        ntCameraDownAngle = table.getEntry("CameraDownAngle");
+        cameraDownAngleDeg = DOWN_ANGLE_DEG_DEFAULT;
+        ntCameraDownAngle.setDouble(cameraDownAngleDeg);
+        ntCameraDownAngle.addListener(event -> {
+            cameraDownAngleDeg = event.getEntry().getValue().getDouble();
+        }, EntryListenerFlags.kNew | EntryListenerFlags.kUpdate);
+
+        ntCameraTurnOffset = table.getEntry("CameraTurnOffset");
+        cameraTurnOffsetDeg = TURN_ANGLE_OFFSET_DEG_DEFAULT;
+        ntCameraTurnOffset.getDouble(cameraTurnOffsetDeg);
+        ntCameraTurnOffset.addListener(event -> {
+            cameraTurnOffsetDeg = event.getEntry().getValue().getDouble();
+        }, EntryListenerFlags.kNew | EntryListenerFlags.kUpdate);
+
+        ntMinBoundingRectWidth = table.getEntry("BoundingRectMinWidth");
+        minBoundingRectWidth = MIN_BOUNDING_RECT_WIDTH_DEFAULT;
+        ntMinBoundingRectWidth.setDouble(minBoundingRectWidth);
+        ntMinBoundingRectWidth.addListener(event -> {
+            minBoundingRectWidth = (int) event.getEntry().getValue().getDouble();
+        }, EntryListenerFlags.kNew | EntryListenerFlags.kUpdate);
+
+        ntBoundingRectRatio = table.getEntry("BoundingRectRatio");
+        boundingRectRatio = BOUNDING_RECT_RATIO_DEFAULT;
+        ntBoundingRectRatio.setDouble(boundingRectRatio);
+        ntBoundingRectRatio.addListener(event -> {
+            boundingRectRatio = event.getEntry().getValue().getDouble();
+        }, EntryListenerFlags.kNew | EntryListenerFlags.kUpdate);
+
+        ntBoundingRectRatioTolerance = table.getEntry("BoundingRectRatioTolerance");
+        boundingRectRatioTolerance = BOUNDING_RECT_RATIO_TOLERANCE_DEFAULT;
+        ntBoundingRectRatioTolerance.setDouble(boundingRectRatioTolerance);
+        ntBoundingRectRatioTolerance.addListener(event -> {
+            boundingRectRatioTolerance = event.getEntry().getValue().getDouble();
+        }, EntryListenerFlags.kNew | EntryListenerFlags.kUpdate);
+
     }
 
     public void process(VisionPipeline pipeline) {
         BallPipeline ballPipeline = (BallPipeline) pipeline;
         Rect boundingRectRed = ballPipeline.boundingRectRed;
         Rect boundingRectBlue = ballPipeline.boundingRectBlue;
-        hasRed.setBoolean(false);
-        if (boundingRectRed != null && ((boundingRectRed.width - boundingRectRed.height) <= 1)
-                                    && (boundingRectRed.size().area() >= 25)){
-            int topLeftY = boundingRectRed.y;
-            //int topLeftX = CAMERA_X_RESOLUTION - boundingRectRed.x;
-            int centerX = (boundingRectRed.x + boundingRectRed.width/2); 
-            double distanceToTargetRed = distance(topLeftY);
-            double turningAngleRed = angle(centerX);
-            hasRed.setBoolean(true);
-            redDistance.setDouble(distanceToTargetRed);
-            redAngle.setDouble(turningAngleRed);
-            //System.out.println("Area of Red Bounding rect = " + boundingRectRed.area());
-            //System.out.println("Top left of red rect: " + String.valueOf(topLeftY));
-            //System.out.println("Distance to red : " + String.valueOf(distanceToTargetRed));
-            //System.out.println("Angle to red : " + String.valueOf(turningAngleRed));
-        }
-        else
-        {
-            hasRed.setBoolean(false);
-            redDistance.setDouble(0);
-            redAngle.setDouble(0);
-        }
-        hasBlue.setBoolean(false);
-        
-        if (boundingRectBlue != null && ((boundingRectBlue.width - boundingRectBlue.height) <= 1) 
-                                     && (boundingRectBlue.size().area() > 25))
-        {
-            int topLeftY = boundingRectBlue.y;
-            //int topLeftX = CAMERA_X_RESOLUTION - boundingRectBlue.x;
-            int centerX = (boundingRectBlue.x + boundingRectBlue.width/2);
-            double distanceToTargetBlue = distance(topLeftY);
-            double turningAngleBlue = angle(centerX);
-            hasBlue.setBoolean(true);
-            blueDistance.setDouble(distanceToTargetBlue);
-            blueAngle.setDouble(turningAngleBlue);
-            //System.out.println("Area of Blue Bounding rect = " + boundingRectBlue.area());
-            //System.out.println("Top left of blue rect: " + String.valueOf(topLeftY));
-            //System.out.println("Distance to blue : " + String.valueOf(distanceToTargetBlue));
-            //System.out.println("Angle to blue : " + String.valueOf(turningAngleBlue));
 
-            //String.valueOf(topLeftX)
+        hasRed.setBoolean(false);
+        redAngle.setDouble(0.0);
+        redDistance.setDouble(0.0);
+        if (boundingRectRed != null) {
+            double redRatioCalc = (double) boundingRectRed.height / ((double) boundingRectRed.width);
+            redRatio.setDouble(redRatioCalc);
+            redWidth.setDouble(boundingRectRed.width);
+            redHeight.setDouble(boundingRectRed.height);
+            redX.setDouble(boundingRectRed.x);
+            redY.setDouble(boundingRectRed.y);
+            if (Math.abs(redRatioCalc - boundingRectRatio) < boundingRectRatioTolerance
+                    && (boundingRectRed.width >= minBoundingRectWidth)) {
+                int topLeftY = boundingRectRed.y;
+                int centerX = (boundingRectRed.x + boundingRectRed.width / 2);
+                double distanceToTargetRed = distance(topLeftY);
+                double turningAngleRed = angle(centerX);
+                hasRed.setBoolean(true);
+                redDistance.setDouble(distanceToTargetRed);
+                redAngle.setDouble(turningAngleRed);
+            }
         }
-        else
-        {
-            hasBlue.setBoolean(false);
-            blueDistance.setDouble(0);
-            blueAngle.setDouble(0);
+
+        hasBlue.setBoolean(false);
+        blueDistance.setDouble(0.0);
+        blueAngle.setDouble(0.0);
+        if (boundingRectBlue != null) {
+            blueWidth.setDouble(boundingRectBlue.width);
+            blueHeight.setDouble(boundingRectBlue.height);
+            blueX.setDouble(boundingRectBlue.x);
+            blueY.setDouble(boundingRectBlue.y);
+            double blueRatioCalc = (double) boundingRectBlue.height / ((double) boundingRectBlue.width);
+            blueRatio.setDouble(blueRatioCalc);
+
+            if (Math.abs(blueRatioCalc - boundingRectRatio) < boundingRectRatioTolerance
+                    && (boundingRectBlue.width >= minBoundingRectWidth)) {
+                int topLeftY = boundingRectBlue.y;
+                int centerX = (boundingRectBlue.x + boundingRectBlue.width / 2);
+                double distanceToTargetBlue = distance(topLeftY);
+                double turningAngleBlue = angle(centerX);
+                hasBlue.setBoolean(true);
+                blueDistance.setDouble(distanceToTargetBlue);
+                blueAngle.setDouble(turningAngleBlue);
+            }
         }
     }
 
     private double distance(int y) {
-        return (CAMERA_HEIGHT_IN - BALL_HEIGHT_IN) *
-                Math.tan((90.0 - DOWN_ANGLE_DEG
-                        - (y - CAMERA_Y_RESOLUTION / 2.0)
-                                / PIXELS_PER_DEGREE)
+        return (cameraHeight - ballHeight) *
+                Math.tan((90.0 - cameraDownAngleDeg
+                        - (y - cameraFrameHeight / 2.0)
+                                / pixelPerYDegree)
                         * DEG_TO_RADIANS);
     }
 
     private double angle(int x) {
-        return (x - CAMERA_X_RESOLUTION / 2.0)
-                / PIXELS_PER_DEGREE
-                + TURN_ANGLE_OFFSET_DEG;
+        return (x - cameraFrameWidth / 2.0)
+                / pixelPerXDegree
+                + cameraTurnOffsetDeg;
     }
 }
