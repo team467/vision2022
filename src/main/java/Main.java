@@ -333,6 +333,7 @@ public final class Main {
     }
 
     if (ballTrackingCamera != null) {
+      System.out.println("HAVE BALL TRACKING CAMERA!!!");
       BallProcessor ballProcessor = new BallProcessor(ballTrackingCamera, networkTableInstance);
       VisionThread ballVisionThread = new VisionThread(ballTrackingCamera,
           new BallPipeline(), pipeline -> {

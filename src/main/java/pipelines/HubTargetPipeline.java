@@ -29,7 +29,10 @@ import edu.wpi.first.vision.VisionPipeline;
  */
 public class HubTargetPipeline implements VisionPipeline {
 
+	private boolean usePipeline = true;
+
 	// Outputs
+	private Mat inputStream = new Mat();
 	private Mat hslThresholdOutput = new Mat();
 	private ArrayList<MatOfPoint> findContoursOutput = new ArrayList<MatOfPoint>();
 	private ArrayList<MatOfPoint> filterContoursOutput = new ArrayList<MatOfPoint>();
@@ -50,6 +53,8 @@ public class HubTargetPipeline implements VisionPipeline {
 	private double filterContoursMinVertices = 30.0;
 	private double filterContoursMinRatio = 0.0;
 	private double filterContoursMaxRatio = 1000.0;
+
+	private NetworkTableEntry ntUsePipeline;
 
 	private NetworkTableEntry ntHslThresholdHueMin;
 	private NetworkTableEntry ntHslThresholdSaturationMin;
@@ -76,7 +81,14 @@ public class HubTargetPipeline implements VisionPipeline {
 	}
 
 	public HubTargetPipeline(NetworkTableInstance networkTableInstance) {
+
 		NetworkTable table = networkTableInstance.getTable("HubTargetPipeline");
+
+		ntUsePipeline = table.getEntry("usePipeline");
+		ntUsePipeline.setBoolean(usePipeline);
+		ntUsePipeline.addListener(event -> {
+			usePipeline = event.getEntry().getValue().getBoolean();
+		}, EntryListenerFlags.kNew | EntryListenerFlags.kUpdate);
 
 		ntHslThresholdHueMin = table.getEntry("HslThresholdHueMin");
 		ntHslThresholdHueMin.setDouble(hslThresholdHue[0]);
@@ -195,8 +207,8 @@ public class HubTargetPipeline implements VisionPipeline {
 	@Override
 	public void process(Mat source0) {
 		// Step HSL_Threshold0:
-		Mat hslThresholdInput = source0;
-		hslThreshold(hslThresholdInput, hslThresholdHue, hslThresholdSaturation, hslThresholdLuminance,
+		inputStream = source0;
+		hslThreshold(inputStream, hslThresholdHue, hslThresholdSaturation, hslThresholdLuminance,
 				hslThresholdOutput);
 
 		// Step Find_Contours0:
@@ -370,6 +382,10 @@ public class HubTargetPipeline implements VisionPipeline {
 			}
 			outputContours.add(mopHull);
 		}
+	}
+
+	public Mat inputStream() {
+		return inputStream;
 	}
 
 }

@@ -1,28 +1,35 @@
 {
     "team": 467,
     "ntmode": "client",
+    "switched cameras": [],
     "cameras": [
         {
-            "name": "Hub Target Camera",
-            "path": "/dev/video0",
-            "pixel format": "YUYV",
-            "width": 640,
-            "height": 360,
             "fps": 15,
-            "brightness": 100,
+            "height": 360,
+            "name": "Hub Target Camera",
+            "path": "/dev/v4l/by-path/platform-3f980000.usb-usb-0:1.4:1.0-video-index0",
+            "pixel format": "yuyv",
+            "brightness": 0,
             "white balance": "auto",
-            "exposure": 0
+            "exposure": 0,
+            "stream": {
+                "properties": []
+            },
+            "width": 640
         },
         {
-            "name": "Ball Tracking Camera",
-            "path": "/dev/video0",
-            "pixel format": "YUYV",
-            "width": 640,
-            "height": 360,
             "fps": 15,
-            "brightness": 100,
+            "height": 360,
+            "name": "Ball Tracking Camera",
+            "path": "/dev/v4l/by-path/platform-3f980000.usb-usb-0:1.2:1.0-video-index0",
+            "pixel format": "yuyv",
+            "brightness": 50,
             "white balance": "auto",
-            "exposure": "auto"
+            "exposure": "auto",
+            "stream": {
+                "properties": []
+            },
+            "width": 640
         },
         {
             "name": "Driver Front Camera",

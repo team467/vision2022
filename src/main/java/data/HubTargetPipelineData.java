@@ -1,5 +1,7 @@
 package data;
 
+import edu.wpi.first.networktables.EntryListenerFlags;
+
 public class HubTargetPipelineData extends DataHandler {
 
     double[] hslThresholdHue = { 46.7561222399084, 89.79841567788532 };
@@ -142,6 +144,104 @@ public class HubTargetPipelineData extends DataHandler {
 
     private HubTargetPipelineData() {
         super("HubTargetPipelineData");
+
+        if (USE_NETWORK_TABLES) {
+            table.getEntry("hslThresholdHueMin").setDouble(hslThresholdHue[0]);
+            table.getEntry("hslThresholdHueMin").addListener(event -> {
+                hslThresholdHue[0] = (int) event.getEntry().getValue().getDouble();
+            }, EntryListenerFlags.kNew | EntryListenerFlags.kUpdate);
+
+            table.getEntry("hslThresholdHueMax").setDouble(hslThresholdHue[1]);
+            table.getEntry("hslThresholdHueMax").addListener(event -> {
+                hslThresholdHue[1] = event.getEntry().getValue().getDouble();
+            }, EntryListenerFlags.kNew | EntryListenerFlags.kUpdate);
+
+            table.getEntry("hslThresholdSaturationMin").setDouble(hslThresholdSaturation[0]);
+            table.getEntry("hslThresholdSaturationMin").addListener(event -> {
+                hslThresholdSaturation[0] = (int) event.getEntry().getValue().getDouble();
+            }, EntryListenerFlags.kNew | EntryListenerFlags.kUpdate);
+
+            table.getEntry("hslThresholdSaturationMax").setDouble(hslThresholdSaturation[1]);
+            table.getEntry("hslThresholdSaturationMax").addListener(event -> {
+                hslThresholdSaturation[1] = event.getEntry().getValue().getDouble();
+            }, EntryListenerFlags.kNew | EntryListenerFlags.kUpdate);
+
+            table.getEntry("hslThresholdLuminanceMin").setDouble(hslThresholdLuminance[0]);
+            table.getEntry("hslThresholdLuminanceMin").addListener(event -> {
+                hslThresholdLuminance[0] = (int) event.getEntry().getValue().getDouble();
+            }, EntryListenerFlags.kNew | EntryListenerFlags.kUpdate);
+
+            table.getEntry("hslThresholdLuminanceMax").setDouble(hslThresholdLuminance[1]);
+            table.getEntry("hslThresholdLuminanceMax").addListener(event -> {
+                hslThresholdLuminance[1] = event.getEntry().getValue().getDouble();
+            }, EntryListenerFlags.kNew | EntryListenerFlags.kUpdate);
+
+            table.getEntry("filterContoursMinArea").setDouble(filterContoursMinArea);
+            table.getEntry("filterContoursMinArea").addListener(event -> {
+                filterContoursMinArea = event.getEntry().getValue().getDouble();
+            }, EntryListenerFlags.kNew | EntryListenerFlags.kUpdate);
+
+            table.getEntry("filterContoursMinPerimeter").setDouble(filterContoursMinPerimeter);
+            table.getEntry("filterContoursMinPerimeter").addListener(event -> {
+                filterContoursMinPerimeter = event.getEntry().getValue().getDouble();
+            }, EntryListenerFlags.kNew | EntryListenerFlags.kUpdate);
+
+            table.getEntry("filterContoursMinWidth").setDouble(filterContoursMinWidth);
+            table.getEntry("filterContoursMinWidth").addListener(event -> {
+                filterContoursMinWidth = event.getEntry().getValue().getDouble();
+            }, EntryListenerFlags.kNew | EntryListenerFlags.kUpdate);
+
+            table.getEntry("filterContoursMaxWidth").setDouble(filterContoursMaxWidth);
+            table.getEntry("filterContoursMaxWidth").addListener(event -> {
+                filterContoursMaxWidth = event.getEntry().getValue().getDouble();
+            }, EntryListenerFlags.kNew | EntryListenerFlags.kUpdate);
+
+            table.getEntry("filterContoursMinHeight").setDouble(filterContoursMinHeight);
+            table.getEntry("filterContoursMinHeight").addListener(event -> {
+                filterContoursMinHeight = event.getEntry().getValue().getDouble();
+            }, EntryListenerFlags.kNew | EntryListenerFlags.kUpdate);
+
+            table.getEntry("filterContoursMaxHeight").setDouble(filterContoursMaxHeight);
+            table.getEntry("filterContoursMaxHeight").addListener(event -> {
+                filterContoursMaxHeight = event.getEntry().getValue().getDouble();
+            }, EntryListenerFlags.kNew | EntryListenerFlags.kUpdate);
+
+            table.getEntry("filterContoursSolidityMin").setDouble(filterContoursSolidity[0]);
+            table.getEntry("filterContoursSolidityMin").addListener(event -> {
+                filterContoursSolidity[0] = (int) event.getEntry().getValue().getDouble();
+            }, EntryListenerFlags.kNew | EntryListenerFlags.kUpdate);
+
+            table.getEntry("filterContoursSolidityMin").setDouble(filterContoursSolidity[1]);
+            table.getEntry("filterContoursSolidityMin").addListener(event -> {
+                filterContoursSolidity[1] = event.getEntry().getValue().getDouble();
+            }, EntryListenerFlags.kNew | EntryListenerFlags.kUpdate);
+
+            table.getEntry("filterContoursMaxVertices").setDouble(filterContoursMaxVertices);
+            table.getEntry("filterContoursMaxVertices").addListener(event -> {
+                filterContoursMaxVertices = event.getEntry().getValue().getDouble();
+            }, EntryListenerFlags.kNew | EntryListenerFlags.kUpdate);
+
+            table.getEntry("filterContoursMinVertices").setDouble(filterContoursMinVertices);
+            table.getEntry("filterContoursMinVertices").addListener(event -> {
+                filterContoursMinVertices = (int) event.getEntry().getValue().getDouble();
+            }, EntryListenerFlags.kNew | EntryListenerFlags.kUpdate);
+
+            table.getEntry("filterContoursMinRatio").setDouble(filterContoursMinRatio);
+            table.getEntry("filterContoursMinRatio").addListener(event -> {
+                filterContoursMinRatio = event.getEntry().getValue().getDouble();
+            }, EntryListenerFlags.kNew | EntryListenerFlags.kUpdate);
+
+            table.getEntry("filterContoursMaxRatio").setDouble(filterContoursMaxRatio);
+            table.getEntry("filterContoursMaxRatio").addListener(event -> {
+                filterContoursMaxRatio = event.getEntry().getValue().getDouble();
+            }, EntryListenerFlags.kNew | EntryListenerFlags.kUpdate);
+        }
+
+    }
+
+    public static void main(String args[]) {
+        HubTargetPipelineData data = new HubTargetPipelineData();
+        data.save();
     }
 
 }

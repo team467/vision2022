@@ -2,11 +2,10 @@ package data;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.lang.reflect.Field;
-import java.util.HashMap;
 
 import com.google.gson.Gson;
 
@@ -18,9 +17,9 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 public class DataHandler {
     private static String JSON_DIRECTORY = "./resources/";
 
-    private static HashMap<String, Object> networkedClasses = new HashMap<String, Object>();
+    protected static final boolean USE_NETWORK_TABLES = false;
 
-    protected static NetworkTable mainTable = NetworkTableInstance.getDefault().getTable("Config");
+    protected NetworkTable mainTable;
 
     protected NetworkTable table;
     protected NetworkTableEntry saveButton;
@@ -30,80 +29,39 @@ public class DataHandler {
         if (!jsonDirectory.exists()) {
             jsonDirectory.mkdirs();
         }
-        table = mainTable.getSubTable(tableName);
-        saveButton = table.getEntry(tableName + "_Save");
-        saveButton.setBoolean(false);
-        saveButton.addListener(event -> {
-            save(this);
+
+        if (USE_NETWORK_TABLES) {
+            mainTable = NetworkTableInstance.getDefault().getTable("Config");
+            table = mainTable.getSubTable(tableName);
+            saveButton = table.getEntry(tableName + "_Save");
             saveButton.setBoolean(false);
-        }, EntryListenerFlags.kNew | EntryListenerFlags.kUpdate);
+            saveButton.addListener(event -> {
+                save(this);
+                saveButton.setBoolean(false);
+            }, EntryListenerFlags.kNew | EntryListenerFlags.kUpdate);
+        }
 
     }
 
-    protected static <T> Object load(Object obj) {
+    protected static Object load(Object obj) {
         String className = obj.getClass().getSimpleName();
-        NetworkTable table = mainTable.getSubTable(className);
         try {
-            System.out.println(JSON_DIRECTORY + className + ".json");
             File file = new File(JSON_DIRECTORY + className + ".json");
             if (file.exists()) {
-                BufferedReader reader = new BufferedReader(new FileReader(file));
+                BufferedReader reader;
+                reader = new BufferedReader(new FileReader(file));
                 Gson gson = new Gson();
                 Object obj2 = gson.fromJson(reader, obj.getClass());
                 reader.close();
-
-                if (obj2 != null) {
-                    obj = obj2;
-                }
-
-                networkedClasses.put(className, obj);
-
-                if (obj == null) {
-                    System.err.println("Darn 2");
-                }
-
-                Field[] fields = obj.getClass().getDeclaredFields();
-
-                for (Field field : fields) {
-                    String fieldName = field.getName();
-                    String fieldType = field.getType().getSimpleName();
-                    NetworkTableEntry entry = table.getEntry(fieldName);
-                    if (fieldType.equals("double")) {
-                        entry.setDouble(field.getDouble(obj));
-                        entry.addListener(event -> {
-                            try {
-                                field.setDouble(networkedClasses.get(className),
-                                        event.getEntry().getValue().getDouble());
-                            } catch (IllegalArgumentException | IllegalAccessException e) {
-                                e.printStackTrace();
-                            }
-                        }, EntryListenerFlags.kNew | EntryListenerFlags.kUpdate);
-                    } else if (fieldType.equals("int")) {
-                        entry.setDouble(field.getDouble(obj));
-                        entry.addListener(event -> {
-                            try {
-                                field.setInt(networkedClasses.get(className),
-                                        (int) event.getEntry().getValue().getDouble());
-                            } catch (IllegalArgumentException | IllegalAccessException e) {
-                                e.printStackTrace();
-                            }
-                        }, EntryListenerFlags.kNew | EntryListenerFlags.kUpdate);
-                    } else if (fieldType.equals("String")) {
-                        entry.setString((String) field.get(obj));
-                        entry.addListener(event -> {
-                            try {
-                                field.set(networkedClasses.get(className), event.getEntry().getValue());
-                            } catch (IllegalArgumentException | IllegalAccessException e) {
-                                e.printStackTrace();
-                            }
-                        }, EntryListenerFlags.kNew | EntryListenerFlags.kUpdate);
-                    }
-                }
+                obj = (obj2 != null) ? obj2 : obj;
             }
-        } catch (IOException | IllegalArgumentException | IllegalAccessException e) {
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
             e.printStackTrace();
         }
-        return networkedClasses.get(className);
+
+        return obj;
     }
 
     protected void save(Object obj) {

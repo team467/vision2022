@@ -141,6 +141,8 @@ public class BallProcessor extends Processor {
         Rect boundingRectBlue = ballPipeline.boundingRectBlue;
 
         hasRed.setBoolean(false);
+        redAngle.setDouble(0.0);
+        redDistance.setDouble(0.0);
         if (boundingRectRed != null) {
             double redRatioCalc = (double) boundingRectRed.height / ((double) boundingRectRed.width);
             redRatio.setDouble(redRatioCalc);
@@ -161,6 +163,8 @@ public class BallProcessor extends Processor {
         }
 
         hasBlue.setBoolean(false);
+        blueDistance.setDouble(0.0);
+        blueAngle.setDouble(0.0);
         if (boundingRectBlue != null) {
             blueWidth.setDouble(boundingRectBlue.width);
             blueHeight.setDouble(boundingRectBlue.height);

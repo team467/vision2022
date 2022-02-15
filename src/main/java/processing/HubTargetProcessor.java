@@ -86,6 +86,8 @@ public class HubTargetProcessor extends Processor {
 
         HubTargetPipeline hubTargetPipeline = (HubTargetPipeline) pipeline;
 
+        // Mat inputStream = pipeline.
+
         if (hubTargetPipeline.filterContoursOutput().size() != 0) {
             int i = 0;
             int beforeMean = 0;
@@ -95,31 +97,35 @@ public class HubTargetProcessor extends Processor {
                 i++;
             }
 
-            beforeMean /= i;
+            if (i != 0) {
+                beforeMean /= i;
 
-            i = 0;
-            Mat mat = hubTargetPipeline.hslThresholdOutput();
-            for (MatOfPoint contour : hubTargetPipeline.filterContoursOutput()) {
-                Rect box = Imgproc.boundingRect(contour);
-                if (Math.abs(beforeMean - box.y) < yMidpointTolerance) {
-                    x += box.x;
-                    y += box.y;
-                    i++;
-                    Imgproc.rectangle(mat,
-                            new Point(box.x, box.y),
-                            new Point(box.x + box.width, box.y + box.height),
-                            new Scalar(255, 255, 255), 5);
+                i = 0;
+                Mat mat = hubTargetPipeline.hslThresholdOutput();
+                for (MatOfPoint contour : hubTargetPipeline.filterContoursOutput()) {
+                    Rect box = Imgproc.boundingRect(contour);
+                    if (Math.abs(beforeMean - box.y) < yMidpointTolerance) {
+                        x += box.x;
+                        y += box.y;
+                        i++;
+                        Imgproc.rectangle(mat,
+                                new Point(box.x, box.y),
+                                new Point(box.x + box.width, box.y + box.height),
+                                new Scalar(255, 255, 255), 5);
+                    }
+                }
+
+                if (i != 0) {
+                    x /= i;
+                    y /= i;
+
+                    calcDistance(y);
+                    calcAngle(x);
+                    table.getEntry("isValid").setBoolean(true);
+                    outputStream.putFrame(mat);
                 }
             }
 
-            x /= i;
-            y /= i;
-
-            calcDistance(y);
-            calcAngle(x);
-            table.getEntry("isValid").setBoolean(true);
-
-            outputStream.putFrame(mat);
         } else {
             table.getEntry("angle").setDouble(0.0);
             table.getEntry("distance").setDouble(0.0);
