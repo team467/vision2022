@@ -29,6 +29,8 @@ import edu.wpi.first.vision.VisionPipeline;
  */
 public class HubTargetPipeline implements VisionPipeline {
 
+	private boolean usePipeline = true;
+
 	// Outputs
 	private Mat hslThresholdOutput = new Mat();
 	private ArrayList<MatOfPoint> findContoursOutput = new ArrayList<MatOfPoint>();
@@ -50,6 +52,8 @@ public class HubTargetPipeline implements VisionPipeline {
 		double filterContoursMinVertices = 0;
 		double filterContoursMinRatio = 0;
 		double filterContoursMaxRatio = 1000;
+
+	private NetworkTableEntry ntUsePipeline;
 
 	private NetworkTableEntry ntHslThresholdHueMin;
 	private NetworkTableEntry ntHslThresholdSaturationMin;
@@ -76,7 +80,14 @@ public class HubTargetPipeline implements VisionPipeline {
 	}
 
 	public HubTargetPipeline(NetworkTableInstance networkTableInstance) {
+		
 		NetworkTable table = networkTableInstance.getTable("HubTargetPipeline");
+		
+		ntUsePipeline = table.getEntry("usePipeline");
+		ntUsePipeline.setBoolean(usePipeline);
+		ntUsePipeline.addListener(event -> {
+			usePipeline = event.getEntry().getValue().getBoolean();
+		}, EntryListenerFlags.kNew | EntryListenerFlags.kUpdate);
 
 		ntHslThresholdHueMin = table.getEntry("HslThresholdHueMin");
 		ntHslThresholdHueMin.setDouble(hslThresholdHue[0]);
@@ -194,27 +205,30 @@ public class HubTargetPipeline implements VisionPipeline {
 	 */
 	@Override
 	public void process(Mat source0) {
-		// Step HSL_Threshold0:
-		Mat hslThresholdInput = source0;
-		hslThreshold(hslThresholdInput, hslThresholdHue, hslThresholdSaturation, hslThresholdLuminance,
-				hslThresholdOutput);
 
-		// Step Find_Contours0:
-		Mat findContoursInput = hslThresholdOutput;
-		boolean findContoursExternalOnly = false;
-		findContours(findContoursInput, findContoursExternalOnly, findContoursOutput);
+		if (usePipeline) {
+			// Step HSL_Threshold0:
+			Mat hslThresholdInput = source0;
+			hslThreshold(hslThresholdInput, hslThresholdHue, hslThresholdSaturation, hslThresholdLuminance,
+					hslThresholdOutput);
 
-		// Step Filter_Contours0:
-		ArrayList<MatOfPoint> filterContoursContours = findContoursOutput;
-		filterContours(filterContoursContours, filterContoursMinArea, filterContoursMinPerimeter,
-				filterContoursMinWidth, filterContoursMaxWidth, filterContoursMinHeight, filterContoursMaxHeight,
-				filterContoursSolidity, filterContoursMaxVertices, filterContoursMinVertices, filterContoursMinRatio,
-				filterContoursMaxRatio, filterContoursOutput);
+			// Step Find_Contours0:
+			Mat findContoursInput = hslThresholdOutput;
+			boolean findContoursExternalOnly = false;
+			findContours(findContoursInput, findContoursExternalOnly, findContoursOutput);
 
-		// Step Convex_Hulls0:
-		ArrayList<MatOfPoint> convexHullsContours = filterContoursOutput;
-		convexHulls(convexHullsContours, convexHullsOutput);
+			// Step Filter_Contours0:
+			ArrayList<MatOfPoint> filterContoursContours = findContoursOutput;
+			filterContours(filterContoursContours, filterContoursMinArea, filterContoursMinPerimeter,
+					filterContoursMinWidth, filterContoursMaxWidth, filterContoursMinHeight, filterContoursMaxHeight,
+					filterContoursSolidity, filterContoursMaxVertices, filterContoursMinVertices, filterContoursMinRatio,
+					filterContoursMaxRatio, filterContoursOutput);
 
+			// Step Convex_Hulls0:
+			ArrayList<MatOfPoint> convexHullsContours = filterContoursOutput;
+			convexHulls(convexHullsContours, convexHullsOutput);
+
+		}
 	}
 
 	/**
