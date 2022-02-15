@@ -8,9 +8,7 @@ import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 
 import edu.wpi.cscore.VideoSource;
-import edu.wpi.first.networktables.EntryListenerFlags;
 import edu.wpi.first.networktables.NetworkTable;
-import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.vision.VisionPipeline;
 import pipelines.HubTargetPipeline;
@@ -18,66 +16,19 @@ import pipelines.HubTargetPipeline;
 public class HubTargetProcessor extends Processor {
 
     public static final String NETWORK_TABLE_NAME = "HubTarget";
-    public static final double TARGET_HEIGHT_FT_DEFAULT = 8.700;
-    public static final double CAMERA_HEIGHT_FT_DEFAULT = 2.875;
-    public static final double UP_ANGLE_DEG_DEFAULT = 45.0;
-    public static final double TURN_ANGLE_OFFSET_DEG_DEFAULT = 0.0;
-    public static final int Y_MIDPOINT_TOLERANCE = 50;
 
-    private double hubTargetHeightFt;
-    private double cameraHeightFt;
-    private double cameraUpAngleDeg;
-    private double cameraTurnOffsetDeg;
-
-    private int yMidpointTolerance;
+    private double hubTargetHeightFt = 8.700;
+    private double cameraHeightFt = 2.875;
+    private double cameraUpAngleDeg = 45.0;
+    private double cameraTurnOffsetDeg = 0.0;
+    private int yMidpointTolerance = 50;
+    private long frameCount = 0;
 
     private NetworkTable table;
-
-    private NetworkTableEntry ntHubTargetHeight;
-    private NetworkTableEntry ntCameraHeight;
-    private NetworkTableEntry ntCameraDownAngle;
-    private NetworkTableEntry ntCameraTurnOffset;
-    private NetworkTableEntry ntYMidpointTolerance;
 
     public HubTargetProcessor(VideoSource camera, NetworkTableInstance networkTableInstance) {
         super(camera, networkTableInstance);
         table = visionTable.getSubTable(NETWORK_TABLE_NAME);
-
-        ntHubTargetHeight = table.getEntry("HubTargetHeightFeet");
-        hubTargetHeightFt = TARGET_HEIGHT_FT_DEFAULT;
-        ntHubTargetHeight.setDouble(hubTargetHeightFt);
-        ntHubTargetHeight.addListener(event -> {
-            hubTargetHeightFt = event.getEntry().getValue().getDouble();
-        }, EntryListenerFlags.kNew | EntryListenerFlags.kUpdate);
-
-        ntCameraHeight = table.getEntry("CameraHeightFeet");
-        cameraHeightFt = CAMERA_HEIGHT_FT_DEFAULT;
-        ntCameraHeight.setDouble(cameraHeightFt);
-        ntCameraHeight.addListener(event -> {
-            cameraHeightFt = event.getEntry().getValue().getDouble();
-        }, EntryListenerFlags.kNew | EntryListenerFlags.kUpdate);
-
-        ntCameraDownAngle = table.getEntry("CameraUpAngleDegrees");
-        cameraUpAngleDeg = UP_ANGLE_DEG_DEFAULT;
-        ntCameraDownAngle.setDouble(cameraUpAngleDeg);
-        ntCameraDownAngle.addListener(event -> {
-            cameraUpAngleDeg = event.getEntry().getValue().getDouble();
-        }, EntryListenerFlags.kNew | EntryListenerFlags.kUpdate);
-
-        ntCameraTurnOffset = table.getEntry("CameraTurnOffsetDegrees");
-        cameraTurnOffsetDeg = TURN_ANGLE_OFFSET_DEG_DEFAULT;
-        ntCameraTurnOffset.setDouble(cameraTurnOffsetDeg);
-        ntCameraTurnOffset.addListener(event -> {
-            cameraTurnOffsetDeg = event.getEntry().getValue().getDouble();
-        }, EntryListenerFlags.kNew | EntryListenerFlags.kUpdate);
-
-        ntYMidpointTolerance = table.getEntry("Y_MidpointTolerance");
-        yMidpointTolerance = Y_MIDPOINT_TOLERANCE;
-        ntYMidpointTolerance.setDouble(yMidpointTolerance);
-        ntYMidpointTolerance.addListener(event -> {
-            yMidpointTolerance = (int) event.getEntry().getValue().getDouble();
-        }, EntryListenerFlags.kNew | EntryListenerFlags.kUpdate);
-
     }
 
     public void process(VisionPipeline pipeline) {
@@ -85,8 +36,6 @@ public class HubTargetProcessor extends Processor {
         int y = 0;
 
         HubTargetPipeline hubTargetPipeline = (HubTargetPipeline) pipeline;
-
-        // Mat inputStream = pipeline.
 
         if (hubTargetPipeline.filterContoursOutput().size() != 0) {
             int i = 0;
@@ -122,7 +71,8 @@ public class HubTargetProcessor extends Processor {
                     calcDistance(y);
                     calcAngle(x);
                     table.getEntry("isValid").setBoolean(true);
-                    outputStream.putFrame(mat);
+                    table.getEntry("frameCount").setDouble(++frameCount);
+
                 }
             }
 
