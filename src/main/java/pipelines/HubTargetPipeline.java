@@ -43,6 +43,14 @@ public class HubTargetPipeline implements VisionPipeline {
 	public void process(Mat source0) {
 		// Step HSL_Threshold0:
 		Mat hslThresholdInput = source0;
+		
+		double hRatio = source0.height() / 720.0;
+		System.out.println("Image Height: " +  hRatio);
+
+		double wRatio = source0.width() / 1280.0;
+		System.out.println(" Image Width: " + wRatio);
+	//	 source0.maxVertices
+		
 		double[] hslThresholdHue = { 46.7561222399084, 89.79841567788532 };
 		double[] hslThresholdSaturation = { 204.09172661870508, 255.0 };
 		double[] hslThresholdLuminance = { 80.26079136690647, 218.51010101010098 };
@@ -56,17 +64,17 @@ public class HubTargetPipeline implements VisionPipeline {
 
 		// Step Filter_Contours0:
 		ArrayList<MatOfPoint> filterContoursContours = findContoursOutput;
-		double filterContoursMinArea = 10.0;
-		double filterContoursMinPerimeter = 175.0;
-		double filterContoursMinWidth = 180.0;
-		double filterContoursMaxWidth = 500.0;
-		double filterContoursMinHeight = 10.0;
+		double filterContoursMinArea = 0.0; //*wRatio * hRatio;
+		double filterContoursMinPerimeter = 0.0; // *wRatio * hRatio;
+		double filterContoursMinWidth = 15.0 ;
+		double filterContoursMaxWidth = 500.0 ;
+		double filterContoursMinHeight = 4.0 ;
 		double filterContoursMaxHeight = 95.0;
 		double[] filterContoursSolidity = { 60.251798561151084, 100 };
-		double filterContoursMaxVertices = 1000.0;
-		double filterContoursMinVertices = 30.0;
+		double filterContoursMaxVertices = 10000000000000000000000000.0;
+		double filterContoursMinVertices = -1.0;
 		double filterContoursMinRatio = 0.0;
-		double filterContoursMaxRatio = 1000.0;
+		double filterContoursMaxRatio = 1000000000.0;
 		filterContours(filterContoursContours, filterContoursMinArea, filterContoursMinPerimeter,
 				filterContoursMinWidth, filterContoursMaxWidth, filterContoursMinHeight, filterContoursMaxHeight,
 				filterContoursSolidity, filterContoursMaxVertices, filterContoursMinVertices, filterContoursMinRatio,
