@@ -14,7 +14,7 @@ public class BallProcessor extends Processor {
     public static final String NETWORK_TABLE_NAME = "BallTracking";
 
     private double ballHeight = 9.5;
-    private double cameraHeight = 16.5;
+    private double cameraHeight = 17.5;
     private double cameraDownAngleDeg = 20.0;
     private double cameraTurnOffsetDeg = 0.0;
 

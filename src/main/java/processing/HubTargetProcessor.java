@@ -18,7 +18,7 @@ public class HubTargetProcessor extends Processor {
     public static final String NETWORK_TABLE_NAME = "HubTarget";
 
     private double hubTargetHeightFt = 8.700;
-    private double cameraHeightFt = 2.875;
+    private double cameraHeightFt = 32.0 / 12.0;
     private double cameraUpAngleDeg = 45.0;
     private double cameraTurnOffsetDeg = 0.0;
     private int yMidpointTolerance = 50;

@@ -22,13 +22,14 @@ import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.networktables.EntryListenerFlags;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.vision.VisionThread;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import pipelines.BallPipeline;
 import pipelines.HubTargetPipeline;
 import processing.BallProcessor;
 import processing.HubTargetProcessor;
 
 public final class Main {
-  private static String configFile = "/boot/frc.json";
+  private static String configFile = "/home/pi/frc.json";
 
   @SuppressWarnings("MemberName")
   public static class CameraConfig {
@@ -183,6 +184,8 @@ public final class Main {
     return true;
   }
 
+  private static int shuffleboardCameraXPos = 0;
+
   /**
    * Start running the camera.
    */
@@ -190,15 +193,19 @@ public final class Main {
 
     CameraServer inst = CameraServer.getInstance();
     UsbCamera camera = new UsbCamera(config.name, config.path);
-    MjpegServer server = inst.startAutomaticCapture(camera);
-
     Gson gson = new GsonBuilder().create();
 
     camera.setConfigJson(gson.toJson(config.config));
     camera.setConnectionStrategy(VideoSource.ConnectionStrategy.kKeepOpen);
 
-    if (config.streamConfig != null) {
-      server.setConfigJson(gson.toJson(config.streamConfig));
+    if (camera.getName().contains("Driver")) {
+      MjpegServer server = inst.startAutomaticCapture(camera);
+      if (config.streamConfig != null) {
+        server.setConfigJson(gson.toJson(config.streamConfig));
+      }
+
+      Shuffleboard.getTab("Main").add(camera).withSize(3, 3).withPosition(shuffleboardCameraXPos, 0);
+      shuffleboardCameraXPos += 3;
     }
 
     return camera;
