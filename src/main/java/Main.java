@@ -29,7 +29,7 @@ import processing.BallProcessor;
 import processing.HubTargetProcessor;
 
 public final class Main {
-  private static String configFile = "/home/pi/frc.json";
+  private static String configFile = "/boot/frc.json";
 
   @SuppressWarnings("MemberName")
   public static class CameraConfig {
