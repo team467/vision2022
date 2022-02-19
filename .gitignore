@@ -31,3 +31,6 @@ gradle-app.setting
 
 # Mac local files
 .DS_Store
+
+# VS Code
+.code-workspace

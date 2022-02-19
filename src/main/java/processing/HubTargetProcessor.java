@@ -8,76 +8,23 @@ import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 
 import edu.wpi.cscore.VideoSource;
-import edu.wpi.first.networktables.EntryListenerFlags;
 import edu.wpi.first.networktables.NetworkTable;
-import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.vision.VisionPipeline;
 import pipelines.HubTargetPipeline;
 
 public class HubTargetProcessor extends Processor {
 
-    public static final String NETWORK_TABLE_NAME = "HubTarget";
-    public static final double TARGET_HEIGHT_FT_DEFAULT = 8.700;
-    public static final double CAMERA_HEIGHT_FT_DEFAULT = 2.875;
-    public static final double UP_ANGLE_DEG_DEFAULT = 45.0;
-    public static final double TURN_ANGLE_OFFSET_DEG_DEFAULT = 0.0;
-    public static final int Y_MIDPOINT_TOLERANCE = 50;
-
-    private double hubTargetHeightFt;
-    private double cameraHeightFt;
-    private double cameraUpAngleDeg;
-    private double cameraTurnOffsetDeg;
-
-    private int yMidpointTolerance;
-
     private NetworkTable table;
-
-    private NetworkTableEntry ntHubTargetHeight;
-    private NetworkTableEntry ntCameraHeight;
-    private NetworkTableEntry ntCameraDownAngle;
-    private NetworkTableEntry ntCameraTurnOffset;
-    private NetworkTableEntry ntYMidpointTolerance;
+    private long frameCount = 0;
 
     public HubTargetProcessor(VideoSource camera, NetworkTableInstance networkTableInstance) {
-        super(camera, networkTableInstance);
-        table = visionTable.getSubTable(NETWORK_TABLE_NAME);
-
-        ntHubTargetHeight = table.getEntry("HubTargetHeightFeet");
-        hubTargetHeightFt = TARGET_HEIGHT_FT_DEFAULT;
-        ntHubTargetHeight.setDouble(hubTargetHeightFt);
-        ntHubTargetHeight.addListener(event -> {
-            hubTargetHeightFt = event.getEntry().getValue().getDouble();
-        }, EntryListenerFlags.kNew | EntryListenerFlags.kUpdate);
-
-        ntCameraHeight = table.getEntry("CameraHeightFeet");
-        cameraHeightFt = CAMERA_HEIGHT_FT_DEFAULT;
-        ntCameraHeight.setDouble(cameraHeightFt);
-        ntCameraHeight.addListener(event -> {
-            cameraHeightFt = event.getEntry().getValue().getDouble();
-        }, EntryListenerFlags.kNew | EntryListenerFlags.kUpdate);
-
-        ntCameraDownAngle = table.getEntry("CameraUpAngleDegrees");
-        cameraUpAngleDeg = UP_ANGLE_DEG_DEFAULT;
-        ntCameraDownAngle.setDouble(cameraUpAngleDeg);
-        ntCameraDownAngle.addListener(event -> {
-            cameraUpAngleDeg = event.getEntry().getValue().getDouble();
-        }, EntryListenerFlags.kNew | EntryListenerFlags.kUpdate);
-
-        ntCameraTurnOffset = table.getEntry("CameraTurnOffsetDegrees");
-        cameraTurnOffsetDeg = TURN_ANGLE_OFFSET_DEG_DEFAULT;
-        ntCameraTurnOffset.setDouble(cameraTurnOffsetDeg);
-        ntCameraTurnOffset.addListener(event -> {
-            cameraTurnOffsetDeg = event.getEntry().getValue().getDouble();
-        }, EntryListenerFlags.kNew | EntryListenerFlags.kUpdate);
-
-        ntYMidpointTolerance = table.getEntry("Y_MidpointTolerance");
-        yMidpointTolerance = Y_MIDPOINT_TOLERANCE;
-        ntYMidpointTolerance.setDouble(yMidpointTolerance);
-        ntYMidpointTolerance.addListener(event -> {
-            yMidpointTolerance = (int) event.getEntry().getValue().getDouble();
-        }, EntryListenerFlags.kNew | EntryListenerFlags.kUpdate);
-
+        super(camera, networkTableInstance, "HubTarget");
+        tuningValues.put("hubTargetHeightFt", 8.700);
+        tuningValues.put("cameraHeightFt", 32.0 / 12.0);
+        tuningValues.put("cameraUpAngleDeg", 45.0);
+        tuningValues.put("cameraTurnOffsetDeg", 0.0);
+        tuningValues.put("yMidpointTolerance", 50.0);
     }
 
     public void process(VisionPipeline pipeline) {
@@ -85,8 +32,6 @@ public class HubTargetProcessor extends Processor {
         int y = 0;
 
         HubTargetPipeline hubTargetPipeline = (HubTargetPipeline) pipeline;
-
-        // Mat inputStream = pipeline.
 
         if (hubTargetPipeline.filterContoursOutput().size() != 0) {
             int i = 0;
@@ -104,7 +49,7 @@ public class HubTargetProcessor extends Processor {
                 Mat mat = hubTargetPipeline.hslThresholdOutput();
                 for (MatOfPoint contour : hubTargetPipeline.filterContoursOutput()) {
                     Rect box = Imgproc.boundingRect(contour);
-                    if (Math.abs(beforeMean - box.y) < yMidpointTolerance) {
+                    if (Math.abs(beforeMean - box.y) < tuningValues.get("yMidpointTolerance")) {
                         x += box.x;
                         y += box.y;
                         i++;
@@ -122,13 +67,12 @@ public class HubTargetProcessor extends Processor {
                     calcDistance(y);
                     calcAngle(x);
                     table.getEntry("isValid").setBoolean(true);
-                    outputStream.putFrame(mat);
+                    table.getEntry("frameCount").setDouble(++frameCount);
+
                 }
             }
 
         } else {
-            table.getEntry("angle").setDouble(0.0);
-            table.getEntry("distance").setDouble(0.0);
             table.getEntry("isValid").setBoolean(false);
         }
 
@@ -138,14 +82,17 @@ public class HubTargetProcessor extends Processor {
 
         double angle = (x - cameraFrameWidth / 2.0)
                 / pixelPerXDegree
-                + cameraTurnOffsetDeg;
+                + tuningValues.get("cameraTurnOffsetDeg");
         table.getEntry("angle").setDouble(angle);
     }
 
     public void calcDistance(int y) {
 
-        double distance = (hubTargetHeightFt - cameraHeightFt)
-                / Math.tan((((cameraFrameHeight / 2.0) - y) / pixelPerYDegree + cameraUpAngleDeg) * DEG_TO_RADIANS);
+        double distance = (tuningValues.get("hubTargetHeightFt") - tuningValues.get("cameraHeightFt"))
+                / Math.tan((((cameraFrameHeight / 2.0) - y)
+                        / pixelPerYDegree
+                        + tuningValues.get("cameraUpAngleDeg"))
+                        * DEG_TO_RADIANS);
         table.getEntry("distance").setDouble(distance);
 
     }

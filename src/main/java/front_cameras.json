@@ -1,0 +1,44 @@
+{
+    "team": 467,
+    "ntmode": "client",
+    "switched cameras": [],
+    "cameras": [
+        {
+            "name": "Ball Tracking Camera",
+            "path": "/dev/v4l/by-path/platform-3f980000.usb-usb-0:1.4:1.0-video-index0",
+            "pixel format": "yuyv",
+            "width": 640,
+            "height": 360,
+            "fps": 15,
+            "brightness": 50,
+            "white balance": "auto",
+            "exposure": "auto",
+            "stream": {
+                "properties": []
+            }
+        },
+        {
+            "name": "Driver Front Camera",
+            "path": "/dev/v4l/by-path/platform-3f980000.usb-usb-0:1.5:1.0-video-index0",
+            "pixel format": "MJPEG",
+            "width": 360,
+            "height": 180,
+            "fps": 30,
+            "brightness": 20,
+            "white balance": "auto",
+            "exposure": "auto",
+            "stream": {
+                "properties": [
+                    {
+                        "name": "compression",
+                        "value": 10
+                    },
+                    {
+                        "name": "default_compression",
+                        "value": 10
+                    }
+                ]
+            }
+        }
+    ]
+}
