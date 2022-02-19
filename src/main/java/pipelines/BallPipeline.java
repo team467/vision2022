@@ -10,7 +10,7 @@ import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
 
-import edu.wpi.first.vision.VisionPipeline;
+import edu.wpi.first.networktables.NetworkTableInstance;
 
 /**
  * Hub Target Pipeline class.
@@ -20,11 +20,54 @@ import edu.wpi.first.vision.VisionPipeline;
  *
  * @author GRIP
  */
-public class BallPipeline implements VisionPipeline {
+public class BallPipeline extends Pipeline {
 
-  public int val;
   public Rect boundingRectBlue;
   public Rect boundingRectRed;
+
+  Scalar blueColorLow;
+  Scalar blueColorHigh;
+  Scalar redColorLow;
+  Scalar redColorHigh;
+
+  public BallPipeline(NetworkTableInstance networkTableInstance) {
+    super(networkTableInstance, "BallPipeline");
+
+    tuningValues.put("lowHueBlue", (double) 100);
+    tuningValues.put("lowSatBlue", (double) 150);
+    tuningValues.put("lowValBlue", (double) 0);
+    tuningValues.put("highHueBlue", (double) 140);
+    tuningValues.put("highSatBlue", (double) 255);
+    tuningValues.put("highValBlue", (double) 255);
+
+    tuningValues.put("lowHueRed", (double) 0);
+    tuningValues.put("lowSatRed", (double) 136);
+    tuningValues.put("lowValRed", (double) 8);
+    tuningValues.put("highHueRed", (double) 6);
+    tuningValues.put("highSatRed", (double) 255);
+    tuningValues.put("highValRed", (double) 255);
+
+  }
+
+  protected void updatePipelineSettings() {
+    blueColorLow = new Scalar(
+        (int) tuningValues.get("lowHueBlue").doubleValue(),
+        (int) tuningValues.get("lowSatBlue").doubleValue(),
+        (int) tuningValues.get("lowValBlue").doubleValue());
+    blueColorHigh = new Scalar(
+        (int) tuningValues.get("highHueBlue").doubleValue(),
+        (int) tuningValues.get("highSatBlue").doubleValue(),
+        (int) tuningValues.get("highValBlue").doubleValue());
+
+    redColorLow = new Scalar(
+        (int) tuningValues.get("lowHueRed").doubleValue(),
+        (int) tuningValues.get("lowSatRed").doubleValue(),
+        (int) tuningValues.get("lowValRed").doubleValue());
+    redColorHigh = new Scalar(
+        (int) tuningValues.get("highHueRed").doubleValue(),
+        (int) tuningValues.get("highSatRed").doubleValue(),
+        (int) tuningValues.get("highValRed").doubleValue());
+  }
 
   public Rect findBoundingRectCommon(Scalar colorLow, Scalar colorHigh, Mat frame) {
     Mat frameHSV = new Mat();
@@ -54,36 +97,14 @@ public class BallPipeline implements VisionPipeline {
   }
 
   public void findBoundingRectBlue(Mat frame) {
-    int lowHueBlue = 100;
-    int lowSatBlue = 150;
-    int lowValBlue = 0;
-    int highHueBlue = 140;
-    int highSatBlue = 255;
-    int highValBlue = 255;
-
-    Scalar colorLow = new Scalar(lowHueBlue, lowSatBlue, lowValBlue);
-    Scalar colorHigh = new Scalar(highHueBlue, highSatBlue, highValBlue);
-
-    boundingRectBlue = findBoundingRectCommon(colorLow, colorHigh, frame);
+    boundingRectBlue = findBoundingRectCommon(blueColorLow, blueColorHigh, frame);
   }
 
   public void findBoundingRectRed(Mat frame) {
-    int lowHueRed = 0;
-    int lowSatRed = 136;
-    int lowValRed = 8;
-    int highHueRed = 6;
-    int highSatRed = 255;
-    int highValRed = 255;
-
-    Scalar colorLow = new Scalar(lowHueRed, lowSatRed, lowValRed);
-    Scalar colorHigh = new Scalar(highHueRed, highSatRed, highValRed);
-
-    boundingRectRed = findBoundingRectCommon(colorLow, colorHigh, frame);
+    boundingRectRed = findBoundingRectCommon(redColorLow, redColorHigh, frame);
   }
 
   public void findBoundingRect(Mat frame) {
-    // System.out.println("blue bounding rect " + boundingRectBlue);
-    // System.out.println("red bounding rect " + boundingRectRed);
     findBoundingRectBlue(frame);
     findBoundingRectRed(frame);
   }

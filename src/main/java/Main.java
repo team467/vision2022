@@ -290,7 +290,7 @@ public final class Main {
       System.out.println("HAVE BALL TRACKING CAMERA");
       BallProcessor ballProcessor = new BallProcessor(ballTrackingCamera, networkTableInstance);
       VisionThread ballVisionThread = new VisionThread(ballTrackingCamera,
-          new BallPipeline(), pipeline -> {
+          new BallPipeline(networkTableInstance), pipeline -> {
             ballProcessor.process(pipeline);
           });
       ballVisionThread.start();

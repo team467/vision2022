@@ -55,6 +55,7 @@ public class BallProcessor extends Processor {
         tuningValues.put("ballHeight", 9.5);
         tuningValues.put("cameraHeight", 17.5);
         tuningValues.put("cameraDownAngleDeg", 20.0);
+        tuningValues.put("cameraDownAngleOffsetDeg", 0.0);
         tuningValues.put("cameraTurnOffsetDeg", 0.0);
 
         tuningValues.put("minBoundingRectWidth", 25.0);
@@ -70,17 +71,6 @@ public class BallProcessor extends Processor {
         BallPipeline ballPipeline = (BallPipeline) pipeline;
         Rect boundingRectRed = ballPipeline.boundingRectRed;
         Rect boundingRectBlue = ballPipeline.boundingRectBlue;
-
-        if (first) {
-            System.out.println("RUNNING BALL PIPELINE AT LEAST ONCE");
-            first = false;
-            if (boundingRectBlue == null) {
-                System.out.println("BLUE IS NULL");
-            }
-            if (boundingRectRed == null) {
-                System.out.println("BLUE IS NULL");
-            }
-        }
 
         hasRed.setBoolean(false);
         if (boundingRectRed != null) {
@@ -121,6 +111,7 @@ public class BallProcessor extends Processor {
     private double distance(int y) {
         return (tuningValues.get("cameraHeight") - tuningValues.get("ballHeight")) *
                 Math.tan((90.0 - tuningValues.get("cameraDownAngleDeg")
+                        - tuningValues.get("cameraDownAngleOffsetDeg")
                         - (y - cameraFrameHeight / 2.0)
                                 / pixelPerYDegree)
                         * DEG_TO_RADIANS);

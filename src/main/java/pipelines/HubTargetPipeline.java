@@ -13,11 +13,7 @@ import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
 
-import edu.wpi.first.networktables.EntryListenerFlags;
-import edu.wpi.first.networktables.NetworkTable;
-import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.vision.VisionPipeline;
 
 /**
  * HubTargetPipeline class.
@@ -27,9 +23,7 @@ import edu.wpi.first.vision.VisionPipeline;
  *
  * @author GRIP
  */
-public class HubTargetPipeline implements VisionPipeline {
-
-	private boolean usePipeline = true;
+public class HubTargetPipeline extends Pipeline {
 
 	// Outputs
 	private Mat inputStream = new Mat();
@@ -54,22 +48,12 @@ public class HubTargetPipeline implements VisionPipeline {
 	private double filterContoursMinRatio = 0.0;
 	private double filterContoursMaxRatio = 1000.0;
 
-	private NetworkTableEntry ntUsePipeline;
-
 	static {
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 	}
 
 	public HubTargetPipeline(NetworkTableInstance networkTableInstance) {
-
-		NetworkTable table = networkTableInstance.getTable("HubTargetPipeline");
-
-		ntUsePipeline = table.getEntry("usePipeline");
-		ntUsePipeline.setBoolean(usePipeline);
-		ntUsePipeline.addListener(event -> {
-			usePipeline = event.getEntry().getValue().getBoolean();
-		}, EntryListenerFlags.kNew | EntryListenerFlags.kUpdate);
-
+		super(networkTableInstance, "HubTargetPipeline");
 	}
 
 	/**
