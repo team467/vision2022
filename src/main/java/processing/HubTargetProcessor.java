@@ -15,20 +15,16 @@ import pipelines.HubTargetPipeline;
 
 public class HubTargetProcessor extends Processor {
 
-    public static final String NETWORK_TABLE_NAME = "HubTarget";
-
-    private double hubTargetHeightFt = 8.700;
-    private double cameraHeightFt = 32.0 / 12.0;
-    private double cameraUpAngleDeg = 45.0;
-    private double cameraTurnOffsetDeg = 0.0;
-    private int yMidpointTolerance = 50;
+    private NetworkTable table;
     private long frameCount = 0;
 
-    private NetworkTable table;
-
     public HubTargetProcessor(VideoSource camera, NetworkTableInstance networkTableInstance) {
-        super(camera, networkTableInstance);
-        table = visionTable.getSubTable(NETWORK_TABLE_NAME);
+        super(camera, networkTableInstance, "HubTarget");
+        tuningValues.put("hubTargetHeightFt", 8.700);
+        tuningValues.put("cameraHeightFt", 32.0 / 12.0);
+        tuningValues.put("cameraUpAngleDeg", 45.0);
+        tuningValues.put("cameraTurnOffsetDeg", 0.0);
+        tuningValues.put("yMidpointTolerance", 50.0);
     }
 
     public void process(VisionPipeline pipeline) {
@@ -53,7 +49,7 @@ public class HubTargetProcessor extends Processor {
                 Mat mat = hubTargetPipeline.hslThresholdOutput();
                 for (MatOfPoint contour : hubTargetPipeline.filterContoursOutput()) {
                     Rect box = Imgproc.boundingRect(contour);
-                    if (Math.abs(beforeMean - box.y) < yMidpointTolerance) {
+                    if (Math.abs(beforeMean - box.y) < tuningValues.get("yMidpointTolerance")) {
                         x += box.x;
                         y += box.y;
                         i++;
@@ -77,8 +73,6 @@ public class HubTargetProcessor extends Processor {
             }
 
         } else {
-            table.getEntry("angle").setDouble(0.0);
-            table.getEntry("distance").setDouble(0.0);
             table.getEntry("isValid").setBoolean(false);
         }
 
@@ -88,14 +82,17 @@ public class HubTargetProcessor extends Processor {
 
         double angle = (x - cameraFrameWidth / 2.0)
                 / pixelPerXDegree
-                + cameraTurnOffsetDeg;
+                + tuningValues.get("cameraTurnOffsetDeg");
         table.getEntry("angle").setDouble(angle);
     }
 
     public void calcDistance(int y) {
 
-        double distance = (hubTargetHeightFt - cameraHeightFt)
-                / Math.tan((((cameraFrameHeight / 2.0) - y) / pixelPerYDegree + cameraUpAngleDeg) * DEG_TO_RADIANS);
+        double distance = (tuningValues.get("hubTargetHeightFt") - tuningValues.get("cameraHeightFt"))
+                / Math.tan((((cameraFrameHeight / 2.0) - y)
+                        / pixelPerYDegree
+                        + tuningValues.get("cameraUpAngleDeg"))
+                        * DEG_TO_RADIANS);
         table.getEntry("distance").setDouble(distance);
 
     }

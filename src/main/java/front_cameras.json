@@ -23,12 +23,21 @@
             "pixel format": "MJPEG",
             "width": 360,
             "height": 180,
-            "fps": 15,
-            "brightness": 50,
+            "fps": 30,
+            "brightness": 20,
             "white balance": "auto",
             "exposure": "auto",
             "stream": {
-                "properties": []
+                "properties": [
+                    {
+                        "name": "compression",
+                        "value": 10
+                    },
+                    {
+                        "name": "default_compression",
+                        "value": 10
+                    }
+                ]
             }
         }
     ]
