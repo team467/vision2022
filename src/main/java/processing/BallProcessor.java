@@ -17,9 +17,9 @@ public class BallProcessor extends Processor {
     public static final double CAMERA_HEIGHT_IN_DEFAULT = 16.5;
     public static final double DOWN_ANGLE_DEG_DEFAULT = 20.0;
     public static final double TURN_ANGLE_OFFSET_DEG_DEFAULT = 0.0;
-    public static final int MIN_BOUNDING_RECT_WIDTH_DEFAULT = 60;
+    public static final int MIN_BOUNDING_RECT_WIDTH_DEFAULT = 25;
     public static final double BOUNDING_RECT_RATIO_DEFAULT = 1.1;
-    public static final double BOUNDING_RECT_RATIO_TOLERANCE_DEFAULT = 0.2;
+    public static final double BOUNDING_RECT_RATIO_TOLERANCE_DEFAULT = 0.3;
 
     private double ballHeight;
     private double cameraHeight;
@@ -141,8 +141,6 @@ public class BallProcessor extends Processor {
         Rect boundingRectBlue = ballPipeline.boundingRectBlue;
 
         hasRed.setBoolean(false);
-        redAngle.setDouble(0.0);
-        redDistance.setDouble(0.0);
         if (boundingRectRed != null) {
             double redRatioCalc = (double) boundingRectRed.height / ((double) boundingRectRed.width);
             redRatio.setDouble(redRatioCalc);
@@ -163,8 +161,6 @@ public class BallProcessor extends Processor {
         }
 
         hasBlue.setBoolean(false);
-        blueDistance.setDouble(0.0);
-        blueAngle.setDouble(0.0);
         if (boundingRectBlue != null) {
             blueWidth.setDouble(boundingRectBlue.width);
             blueHeight.setDouble(boundingRectBlue.height);
