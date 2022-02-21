@@ -75,6 +75,8 @@ public class Processor {
                 }
         }
 
+        boolean hasOneBall = false;
+
         protected void disableTuning() {
                 for (String entry : tuningIds.keySet()) {
                         table.getEntry(entry).removeListener(0);

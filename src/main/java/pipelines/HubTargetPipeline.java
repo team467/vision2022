@@ -37,14 +37,14 @@ public class HubTargetPipeline extends Pipeline {
 	private double[] hslThresholdLuminance = { 80.26079136690647, 218.51010101010098 };
 
 	private double filterContoursMinArea = 10.0;
-	private double filterContoursMinPerimeter = 175.0;
+	private double filterContoursMinPerimeter = 0.0;
 	private double filterContoursMinWidth = 15.0;
 	private double filterContoursMaxWidth = 500.0;
 	private double filterContoursMinHeight = 4.0;
 	private double filterContoursMaxHeight = 95.0;
-	private double[] filterContoursSolidity = { 60.251798561151084, 100 };
+	private double[] filterContoursSolidity = { 20, 100 };
 	private double filterContoursMaxVertices = 1000.0;
-	private double filterContoursMinVertices = 30.0;
+	private double filterContoursMinVertices = 0.0;
 	private double filterContoursMinRatio = 0.0;
 	private double filterContoursMaxRatio = 1000.0;
 

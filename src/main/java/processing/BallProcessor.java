@@ -86,6 +86,8 @@ public class BallProcessor extends Processor {
                 redDistance.setDouble(distanceToTargetRed);
                 redAngle.setDouble(turningAngleRed);
                 redFrameNumber.setDouble(++redFrameCount);
+                table.getEntry("RedX").setDouble(centerX);
+                table.getEntry("RedY").setDouble(topLeftY);
             }
         }
 
@@ -103,18 +105,25 @@ public class BallProcessor extends Processor {
                 blueDistance.setDouble(distanceToTargetBlue);
                 blueAngle.setDouble(turningAngleBlue);
                 blueFrameNumber.setDouble(++blueFrameCount);
+                table.getEntry("BlueX").setDouble(centerX);
+                table.getEntry("BlueY").setDouble(topLeftY);
+
             }
         }
 
     }
 
     private double distance(int y) {
-        return (tuningValues.get("cameraHeight") - tuningValues.get("ballHeight")) *
+        double distance = (tuningValues.get("cameraHeight")
+                - tuningValues.get("ballHeight")) *
                 Math.tan((90.0 - tuningValues.get("cameraDownAngleDeg")
                         - tuningValues.get("cameraDownAngleOffsetDeg")
                         - (y - cameraFrameHeight / 2.0)
                                 / pixelPerYDegree)
                         * DEG_TO_RADIANS);
+        distance = Math.pow(1.20377, distance) - 52.521;
+        distance *= 0.0254; // Convert inches to meters
+        return distance;
     }
 
     private double angle(int x) {

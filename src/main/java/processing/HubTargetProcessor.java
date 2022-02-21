@@ -8,14 +8,12 @@ import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 
 import edu.wpi.cscore.VideoSource;
-import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.vision.VisionPipeline;
 import pipelines.HubTargetPipeline;
 
 public class HubTargetProcessor extends Processor {
 
-    private NetworkTable table;
     private long frameCount = 0;
 
     public HubTargetProcessor(VideoSource camera, NetworkTableInstance networkTableInstance) {

@@ -47,6 +47,7 @@ public class BallPipeline extends Pipeline {
     tuningValues.put("highSatRed", (double) 255);
     tuningValues.put("highValRed", (double) 255);
 
+    updatePipelineSettings();
   }
 
   protected void updatePipelineSettings() {
