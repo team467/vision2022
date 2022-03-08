@@ -12,6 +12,10 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.vision.VisionPipeline;
 import pipelines.HubTargetPipeline;
 
+import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.util.Date;
+
 public class HubTargetProcessor extends Processor {
 
     private long frameCount = 0;
@@ -28,7 +32,7 @@ public class HubTargetProcessor extends Processor {
     public void process(VisionPipeline pipeline) {
         int x = 0;
         int y = 0;
-
+        String now = "";
         HubTargetPipeline hubTargetPipeline = (HubTargetPipeline) pipeline;
 
         if (hubTargetPipeline.filterContoursOutput().size() != 0) {
@@ -66,12 +70,17 @@ public class HubTargetProcessor extends Processor {
                     calcAngle(x);
                     table.getEntry("isValid").setBoolean(true);
                     table.getEntry("frameCount").setDouble(++frameCount);
-
+                    table.getEntry("timestamp").setValue(LocalDateTime.now().toString());
+                     
+                    now = LocalDateTime.now().toString(); 
+                    table.getEntry("frametimestamp").setValue(now);
                 }
             }
 
         } else {
             table.getEntry("isValid").setBoolean(false);
+            table.getEntry("frametimestamp").setValue(now);
+            table.getEntry("timestamp").setString(LocalDateTime.now().toString());
         }
 
     }
