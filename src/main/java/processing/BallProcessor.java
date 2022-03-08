@@ -1,6 +1,8 @@
 package processing;
 
+import org.opencv.core.MatOfKeyPoint;
 import org.opencv.core.Rect;
+import org.opencv.imgproc.Imgproc;
 
 import edu.wpi.cscore.VideoSource;
 import edu.wpi.first.networktables.NetworkTable;
@@ -8,6 +10,8 @@ import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.vision.VisionPipeline;
 import pipelines.BallPipeline;
+
+import processing.MatOfKeyPoint2MatOfPoint;
 
 public class BallProcessor extends Processor {
 
@@ -69,15 +73,34 @@ public class BallProcessor extends Processor {
     public void process(VisionPipeline pipeline) {
 
         BallPipeline ballPipeline = (BallPipeline) pipeline;
-        Rect boundingRectRed = ballPipeline.boundingRectRed;
-        Rect boundingRectBlue = ballPipeline.boundingRectBlue;
+        MatOfKeyPoint blueBlobs = ballPipeline.findBlobs0Output();
+        MatOfKeyPoint redBlobs = ballPipeline.findBlobs1Output();
+
+        Rect boundingRectRed = null;
+        Rect boundingRectBlue = null;
+        
+        if(redBlobs != null && redBlobs.height() != 0 && !redBlobs.empty())
+        {
+            System.out.println("have red blob " + redBlobs.size() + " " + redBlobs.elemSize() + " " + redBlobs.height() + " " +  redBlobs.width());
+            boundingRectRed = Imgproc.boundingRect(processing.MatOfKeyPoint2MatOfPoint.toMatOfPoint(redBlobs));
+
+        }
+        else
+                System.out.println("no red blob");
+        if(blueBlobs != null)
+        {
+            boundingRectBlue = Imgproc.boundingRect(processing.MatOfKeyPoint2MatOfPoint.toMatOfPoint(blueBlobs));
+        }
+        else
+             System.out.println("no blue blob");
 
         hasRed.setBoolean(false);
+        
         if (boundingRectRed != null) {
             double redRatioCalc = (double) boundingRectRed.height / ((double) boundingRectRed.width);
-            if (Math.abs(redRatioCalc - tuningValues.get("boundingRectRatio")) < tuningValues
-                    .get("boundingRectRatioTolerance")
-                    && (boundingRectRed.width >= tuningValues.get("minBoundingRectWidth"))) {
+            // if (Math.abs(redRatioCalc - tuningValues.get("boundingRectRatio")) < tuningValues
+            //         .get("boundingRectRatioTolerance")
+            //         && (boundingRectRed.width >= tuningValues.get("minBoundingRectWidth"))) {
                 int topLeftY = boundingRectRed.y;
                 int centerX = (boundingRectRed.x + boundingRectRed.width / 2);
                 double distanceToTargetRed = distance(topLeftY);
@@ -88,15 +111,15 @@ public class BallProcessor extends Processor {
                 redFrameNumber.setDouble(++redFrameCount);
                 table.getEntry("RedX").setDouble(centerX);
                 table.getEntry("RedY").setDouble(topLeftY);
-            }
+           // }
         }
 
         hasBlue.setBoolean(false);
         if (boundingRectBlue != null) {
             double blueRatioCalc = (double) boundingRectBlue.height / ((double) boundingRectBlue.width);
-            if (Math.abs(blueRatioCalc - tuningValues.get("boundingRectRatio")) < tuningValues
-                    .get("boundingRectRatioTolerance")
-                    && (boundingRectBlue.width >= tuningValues.get("minBoundingRectWidth"))) {
+            // if (Math.abs(blueRatioCalc - tuningValues.get("boundingRectRatio")) < tuningValues
+            //         .get("boundingRectRatioTolerance")
+            //         && (boundingRectBlue.width >= tuningValues.get("minBoundingRectWidth"))) {
                 int topLeftY = boundingRectBlue.y;
                 int centerX = (boundingRectBlue.x + boundingRectBlue.width / 2);
                 double distanceToTargetBlue = distance(topLeftY);
@@ -108,7 +131,7 @@ public class BallProcessor extends Processor {
                 table.getEntry("BlueX").setDouble(centerX);
                 table.getEntry("BlueY").setDouble(topLeftY);
 
-            }
+            //}
         }
 
     }
