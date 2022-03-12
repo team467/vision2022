@@ -1,5 +1,6 @@
 package processing;
 
+import org.opencv.core.MatOfKeyPoint;
 import org.opencv.core.Rect;
 
 import edu.wpi.cscore.VideoSource;
@@ -8,6 +9,7 @@ import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.vision.VisionPipeline;
 import pipelines.BallPipeline;
+import org.opencv.imgproc.Imgproc;
 
 public class BallProcessor extends Processor {
 
@@ -64,39 +66,53 @@ public class BallProcessor extends Processor {
 
     }
 
-    boolean first = true;
+    // boolean first = true;
 
     public void process(VisionPipeline pipeline) {
 
         BallPipeline ballPipeline = (BallPipeline) pipeline;
-        Rect boundingRectRed = ballPipeline.boundingRectRed;
-        Rect boundingRectBlue = ballPipeline.boundingRectBlue;
+       // Rect boundingRectRed = ballPipeline.boundingRectRed;
+       // Rect boundingRectBlue = ballPipeline.boundingRectBlue;
+
+      MatOfKeyPoint redBlob =  ballPipeline.findBlobs0Output();
+      MatOfKeyPoint blueBlob = ballPipeline.findBlobs1Output();
+
+        Rect boundingRectRed = Imgproc.boundingRect( MatOfKeyPoint2MatOfPoint.toMatOfPoint(redBlob));
+        Rect boundingRectBlue = Imgproc.boundingRect( MatOfKeyPoint2MatOfPoint.toMatOfPoint(blueBlob));
 
         hasRed.setBoolean(false);
-        if (boundingRectRed != null) {
-            double redRatioCalc = (double) boundingRectRed.height / ((double) boundingRectRed.width);
-            if (Math.abs(redRatioCalc - tuningValues.get("boundingRectRatio")) < tuningValues
-                    .get("boundingRectRatioTolerance")
-                    && (boundingRectRed.width >= tuningValues.get("minBoundingRectWidth"))) {
-                int topLeftY = boundingRectRed.y;
-                int centerX = (boundingRectRed.x + boundingRectRed.width / 2);
-                double distanceToTargetRed = distance(topLeftY);
-                double turningAngleRed = angle(centerX);
-                hasRed.setBoolean(true);
-                redDistance.setDouble(distanceToTargetRed);
-                redAngle.setDouble(turningAngleRed);
-                redFrameNumber.setDouble(++redFrameCount);
-                table.getEntry("RedX").setDouble(centerX);
-                table.getEntry("RedY").setDouble(topLeftY);
-            }
-        }
+if (redBlob.
+
+        // if (boundingRectRed != null) {
+        //     double redRatioCalc = (double) boundingRectRed.height / ((double) boundingRectRed.width);
+        //     // if (Math.abs(redRatioCalc - tuningValues.get("boundingRectRatio")) < tuningValues
+        //     //         .get("boundingRectRatioTolerance")
+        //     //         && (boundingRectRed.width >= tuningValues.get("minBoundingRectWidth"))) {
+        //         int topLeftY = boundingRectRed.y;
+        //         int centerX = (boundingRectRed.x + boundingRectRed.width / 2);
+        //         double distanceToTargetRed = distance(topLeftY);
+        //         double turningAngleRed = angle(centerX);
+        //         hasRed.setBoolean(true);
+        //         redDistance.setDouble(distanceToTargetRed);
+        //         redAngle.setDouble(turningAngleRed);
+        //         redFrameNumber.setDouble(++redFrameCount);
+        //         table.getEntry("RedX").setDouble(centerX);
+        //         table.getEntry("RedY").setDouble(topLeftY);
+        //         table.getEntry("RedHasBall").setBoolean(true);
+        //     // }
+        // }
+        // // else{
+            
+        //     table.getEntry("RedHasBall").setBoolean(false);
+        //     redTable.getEntry("HasBall").setBoolean(false);
+        // }
 
         hasBlue.setBoolean(false);
         if (boundingRectBlue != null) {
-            double blueRatioCalc = (double) boundingRectBlue.height / ((double) boundingRectBlue.width);
-            if (Math.abs(blueRatioCalc - tuningValues.get("boundingRectRatio")) < tuningValues
-                    .get("boundingRectRatioTolerance")
-                    && (boundingRectBlue.width >= tuningValues.get("minBoundingRectWidth"))) {
+            // double blueRatioCalc = (double) boundingRectBlue.height / ((double) boundingRectBlue.width);
+            // if (Math.abs(blueRatioCalc - tuningValues.get("boundingRectRatio")) < tuningValues
+            //         .get("boundingRectRatioTolerance")
+            //         && (boundingRectBlue.width >= tuningValues.get("minBoundingRectWidth"))) {
                 int topLeftY = boundingRectBlue.y;
                 int centerX = (boundingRectBlue.x + boundingRectBlue.width / 2);
                 double distanceToTargetBlue = distance(topLeftY);
@@ -105,11 +121,19 @@ public class BallProcessor extends Processor {
                 blueDistance.setDouble(distanceToTargetBlue);
                 blueAngle.setDouble(turningAngleBlue);
                 blueFrameNumber.setDouble(++blueFrameCount);
-                table.getEntry("BlueX").setDouble(centerX);
-                table.getEntry("BlueY").setDouble(topLeftY);
+                // table.getEntry("BlueX").setDouble(centerX);
+                // table.getEntry("BlueY").setDouble(topLeftY);
+                
+                // table.getEntry("BlueHasBall").setBoolean(true);
 
-            }
+            // }
         }
+        // else
+        // {
+            
+        //     table.getEntry("BlueHasBall").setBoolean(false);
+        //     blueTable.getEntry("HasBall").setBoolean(false);
+        // }
 
     }
 
