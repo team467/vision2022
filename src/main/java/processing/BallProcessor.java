@@ -1,5 +1,6 @@
 package processing;
 
+import org.opencv.core.KeyPoint;
 import org.opencv.core.MatOfKeyPoint;
 import org.opencv.core.Rect;
 
@@ -81,26 +82,36 @@ public class BallProcessor extends Processor {
         Rect boundingRectBlue = Imgproc.boundingRect( MatOfKeyPoint2MatOfPoint.toMatOfPoint(blueBlob));
 
         hasRed.setBoolean(false);
-if (redBlob.
+     //   KeyPoint[] kp = redBlob.toArray();
+     //   double rx =  kp[0].pt.x;
+     //   double ry = kp[0].pt.y;
 
-        // if (boundingRectRed != null) {
-        //     double redRatioCalc = (double) boundingRectRed.height / ((double) boundingRectRed.width);
-        //     // if (Math.abs(redRatioCalc - tuningValues.get("boundingRectRatio")) < tuningValues
-        //     //         .get("boundingRectRatioTolerance")
-        //     //         && (boundingRectRed.width >= tuningValues.get("minBoundingRectWidth"))) {
-        //         int topLeftY = boundingRectRed.y;
-        //         int centerX = (boundingRectRed.x + boundingRectRed.width / 2);
-        //         double distanceToTargetRed = distance(topLeftY);
-        //         double turningAngleRed = angle(centerX);
-        //         hasRed.setBoolean(true);
-        //         redDistance.setDouble(distanceToTargetRed);
-        //         redAngle.setDouble(turningAngleRed);
-        //         redFrameNumber.setDouble(++redFrameCount);
-        //         table.getEntry("RedX").setDouble(centerX);
-        //         table.getEntry("RedY").setDouble(topLeftY);
-        //         table.getEntry("RedHasBall").setBoolean(true);
-        //     // }
-        // }
+      //  System.out.println ("Length of the red blob array" + kp.length);
+      System.out.println("RedBlob : " + redBlob.dump());
+      System.out.println("BlueBlob : " + blueBlob.dump());
+    
+
+
+      System.out.println("RedX: " + boundingRectRed.x + " RedY: " + boundingRectRed.y);
+
+      System.out.println("BlueX: " + boundingRectBlue.x + " BlueY: " + boundingRectBlue.y);
+        
+//f (
+
+        if (boundingRectRed != null && boundingRectRed.width > 100 && boundingRectRed.width < 300 ) {
+                int topLeftY = boundingRectRed.y;
+                int centerX = (boundingRectRed.x + boundingRectRed.width / 2);
+                double distanceToTargetRed = distance(topLeftY);
+                double turningAngleRed = angle(centerX);
+                hasRed.setBoolean(true);
+                redDistance.setDouble(distanceToTargetRed);
+                redAngle.setDouble(turningAngleRed);
+                redFrameNumber.setDouble(++redFrameCount);
+                table.getEntry("RedX").setDouble(centerX);
+                table.getEntry("RedY").setDouble(topLeftY);
+                table.getEntry("RedHasBall").setBoolean(true);
+            // }
+        }
         // // else{
             
         //     table.getEntry("RedHasBall").setBoolean(false);
@@ -108,11 +119,8 @@ if (redBlob.
         // }
 
         hasBlue.setBoolean(false);
-        if (boundingRectBlue != null) {
-            // double blueRatioCalc = (double) boundingRectBlue.height / ((double) boundingRectBlue.width);
-            // if (Math.abs(blueRatioCalc - tuningValues.get("boundingRectRatio")) < tuningValues
-            //         .get("boundingRectRatioTolerance")
-            //         && (boundingRectBlue.width >= tuningValues.get("minBoundingRectWidth"))) {
+        if (boundingRectBlue != null && boundingRectBlue.width > 100 && boundingRectBlue.width < 300 ) {
+            
                 int topLeftY = boundingRectBlue.y;
                 int centerX = (boundingRectBlue.x + boundingRectBlue.width / 2);
                 double distanceToTargetBlue = distance(topLeftY);
@@ -145,7 +153,7 @@ if (redBlob.
                         - (y - cameraFrameHeight / 2.0)
                                 / pixelPerYDegree)
                         * DEG_TO_RADIANS);
-        distance = Math.pow(1.20377, distance) - 52.521;
+    //    distance = Math.pow(1.20377, distance) - 52.521;
         distance *= 0.0254; // Convert inches to meters
         return distance;
     }

@@ -76,7 +76,7 @@ public class BallPipeline extends Pipeline {
 
 		// Step Find_Blobs0:
 		Mat findBlobs0Input = rgbThreshold0Output;
-		double findBlobs0MinArea = 500.0;
+		double findBlobs0MinArea = 10000.0;
 		double[] findBlobs0Circularity = {0.0, 1.0};
 		boolean findBlobs0DarkBlobs = false;
 		findBlobs(findBlobs0Input, findBlobs0MinArea, findBlobs0Circularity, findBlobs0DarkBlobs, findBlobs0Output);
@@ -102,7 +102,7 @@ public class BallPipeline extends Pipeline {
 
 		// Step Find_Blobs1:
 		Mat findBlobs1Input = rgbThreshold1Output;
-		double findBlobs1MinArea = 500.0;
+		double findBlobs1MinArea = 10000.0;
 		double[] findBlobs1Circularity = {0.0, 1.0};
 		boolean findBlobs1DarkBlobs = false;
 		findBlobs(findBlobs1Input, findBlobs1MinArea, findBlobs1Circularity, findBlobs1DarkBlobs, findBlobs1Output);
