@@ -79,6 +79,7 @@ public class BallPipeline extends Pipeline {
 		double findBlobs0MinArea = 10000.0;
 		double[] findBlobs0Circularity = {0.0, 1.0};
 		boolean findBlobs0DarkBlobs = false;
+		findBlobs0Output = new MatOfKeyPoint();
 		findBlobs(findBlobs0Input, findBlobs0MinArea, findBlobs0Circularity, findBlobs0DarkBlobs, findBlobs0Output);
 
 		// Step HSL_Threshold1:
@@ -105,6 +106,7 @@ public class BallPipeline extends Pipeline {
 		double findBlobs1MinArea = 10000.0;
 		double[] findBlobs1Circularity = {0.0, 1.0};
 		boolean findBlobs1DarkBlobs = false;
+		findBlobs1Output = new MatOfKeyPoint();
 		findBlobs(findBlobs1Input, findBlobs1MinArea, findBlobs1Circularity, findBlobs1DarkBlobs, findBlobs1Output);
 
 	}
@@ -301,47 +303,47 @@ public class BallPipeline extends Pipeline {
 	private void findBlobs(Mat input, double minArea, double[] circularity,
 		Boolean darkBlobs, MatOfKeyPoint blobList) {
 		FeatureDetector blobDet = FeatureDetector.create(FeatureDetector.SIMPLEBLOB);
-		try {
-			File tempFile = File.createTempFile("config", ".xml");
+		// try {
+		// 	File tempFile = File.createTempFile("config", ".xml");
 
-			StringBuilder config = new StringBuilder();
+		// 	StringBuilder config = new StringBuilder();
 
-			config.append("<?xml version=\"1.0\"?>\n");
-			config.append("<opencv_storage>\n");
-			config.append("<thresholdStep>10.</thresholdStep>\n");
-			config.append("<minThreshold>50.</minThreshold>\n");
-			config.append("<maxThreshold>220.</maxThreshold>\n");
-			config.append("<minRepeatability>2</minRepeatability>\n");
-			config.append("<minDistBetweenBlobs>10.</minDistBetweenBlobs>\n");
-			config.append("<filterByColor>1</filterByColor>\n");
-			config.append("<blobColor>");
-			config.append((darkBlobs ? 0 : 255));
-			config.append("</blobColor>\n");
-			config.append("<filterByArea>1</filterByArea>\n");
-			config.append("<minArea>");
-			config.append(minArea);
-			config.append("</minArea>\n");
-			config.append("<maxArea>");
-			config.append(Integer.MAX_VALUE);
-			config.append("</maxArea>\n");
-			config.append("<filterByCircularity>1</filterByCircularity>\n");
-			config.append("<minCircularity>");
-			config.append(circularity[0]);
-			config.append("</minCircularity>\n");
-			config.append("<maxCircularity>");
-			config.append(circularity[1]);
-			config.append("</maxCircularity>\n");
-			config.append("<filterByInertia>0</filterByInertia>\n");
-			config.append("<filterByConvexity>0</filterByConvexity>\n");
-			config.append("</opencv_storage>\n");
-			FileWriter writer;
-			writer = new FileWriter(tempFile, false);
-			writer.write(config.toString());
-			writer.close();
-			blobDet.read(tempFile.getPath());
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		// 	config.append("<?xml version=\"1.0\"?>\n");
+		// 	config.append("<opencv_storage>\n");
+		// 	config.append("<thresholdStep>10.</thresholdStep>\n");
+		// 	config.append("<minThreshold>50.</minThreshold>\n");
+		// 	config.append("<maxThreshold>220.</maxThreshold>\n");
+		// 	config.append("<minRepeatability>2</minRepeatability>\n");
+		// 	config.append("<minDistBetweenBlobs>10.</minDistBetweenBlobs>\n");
+		// 	config.append("<filterByColor>1</filterByColor>\n");
+		// 	config.append("<blobColor>");
+		// 	config.append((darkBlobs ? 0 : 255));
+		// 	config.append("</blobColor>\n");
+		// 	config.append("<filterByArea>1</filterByArea>\n");
+		// 	config.append("<minArea>");
+		// 	config.append(minArea);
+		// 	config.append("</minArea>\n");
+		// 	config.append("<maxArea>");
+		// 	config.append(Integer.MAX_VALUE);
+		// 	config.append("</maxArea>\n");
+		// 	config.append("<filterByCircularity>1</filterByCircularity>\n");
+		// 	config.append("<minCircularity>");
+		// 	config.append(circularity[0]);
+		// 	config.append("</minCircularity>\n");
+		// 	config.append("<maxCircularity>");
+		// 	config.append(circularity[1]);
+		// 	config.append("</maxCircularity>\n");
+		// 	config.append("<filterByInertia>0</filterByInertia>\n");
+		// 	config.append("<filterByConvexity>0</filterByConvexity>\n");
+		// 	config.append("</opencv_storage>\n");
+		// 	FileWriter writer;
+		// 	writer = new FileWriter(tempFile, false);
+		// 	writer.write(config.toString());
+		// 	writer.close();
+		// 	blobDet.read(tempFile.getPath());
+		// } catch (IOException e) {
+		// 	e.printStackTrace();
+		// }
 
 		blobDet.detect(input, blobList);
 	}
