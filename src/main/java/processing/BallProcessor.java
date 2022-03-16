@@ -67,8 +67,6 @@ public class BallProcessor extends Processor {
 
     }
 
-    // boolean first = true;
-
     public void process(VisionPipeline pipeline) {
 
         BallPipeline ballPipeline = (BallPipeline) pipeline;
@@ -82,21 +80,14 @@ public class BallProcessor extends Processor {
         Rect boundingRectBlue = Imgproc.boundingRect( MatOfKeyPoint2MatOfPoint.toMatOfPoint(blueBlob));
 
         hasRed.setBoolean(false);
-     //   KeyPoint[] kp = redBlob.toArray();
-     //   double rx =  kp[0].pt.x;
-     //   double ry = kp[0].pt.y;
 
       //  System.out.println ("Length of the red blob array" + kp.length);
-      System.out.println("RedBlob : " + redBlob.dump());
-      System.out.println("BlueBlob : " + blueBlob.dump());
-    
+    //   System.out.println("RedBlob : " + redBlob.dump());
+    //   System.out.println("BlueBlob : " + blueBlob.dump());
 
-
-      System.out.println("RedX: " + boundingRectRed.x + " RedY: " + boundingRectRed.y);
-
-      System.out.println("BlueX: " + boundingRectBlue.x + " BlueY: " + boundingRectBlue.y);
+    //   System.out.println("RedX: " + boundingRectRed.x + " RedY: " + boundingRectRed.y);
+    //   System.out.println("BlueX: " + boundingRectBlue.x + " BlueY: " + boundingRectBlue.y);
         
-//f (
 
         if (boundingRectRed != null && boundingRectRed.width > 100 && boundingRectRed.width < 300 ) {
                 int topLeftY = boundingRectRed.y;
@@ -110,13 +101,9 @@ public class BallProcessor extends Processor {
                 table.getEntry("RedX").setDouble(centerX);
                 table.getEntry("RedY").setDouble(topLeftY);
                 table.getEntry("RedHasBall").setBoolean(true);
-            // }
+        } else {
+            redDistance.setDouble(100000.0);
         }
-        // // else{
-            
-        //     table.getEntry("RedHasBall").setBoolean(false);
-        //     redTable.getEntry("HasBall").setBoolean(false);
-        // }
 
         hasBlue.setBoolean(false);
         if (boundingRectBlue != null && boundingRectBlue.width > 100 && boundingRectBlue.width < 300 ) {
@@ -129,19 +116,9 @@ public class BallProcessor extends Processor {
                 blueDistance.setDouble(distanceToTargetBlue);
                 blueAngle.setDouble(turningAngleBlue);
                 blueFrameNumber.setDouble(++blueFrameCount);
-                // table.getEntry("BlueX").setDouble(centerX);
-                // table.getEntry("BlueY").setDouble(topLeftY);
-                
-                // table.getEntry("BlueHasBall").setBoolean(true);
-
-            // }
+        } else {
+            blueDistance.setDouble(100000.0);
         }
-        // else
-        // {
-            
-        //     table.getEntry("BlueHasBall").setBoolean(false);
-        //     blueTable.getEntry("HasBall").setBoolean(false);
-        // }
 
     }
 
