@@ -198,15 +198,15 @@ public final class Main {
     camera.setConfigJson(gson.toJson(config.config));
     camera.setConnectionStrategy(VideoSource.ConnectionStrategy.kKeepOpen);
 
-    // if (camera.getName().contains("Driver")) {
-    MjpegServer server = inst.startAutomaticCapture(camera);
-    if (config.streamConfig != null) {
-      server.setConfigJson(gson.toJson(config.streamConfig));
-    }
+    if (camera.getName().contains("Driver")) {
+      MjpegServer server = inst.startAutomaticCapture(camera);
+      if (config.streamConfig != null) {
+        server.setConfigJson(gson.toJson(config.streamConfig));
+      }
 
-    Shuffleboard.getTab("Main").add(camera).withSize(3, 3).withPosition(shuffleboardCameraXPos, 0);
-    shuffleboardCameraXPos += 3;
-    // }
+      Shuffleboard.getTab("Operator").add(camera).withSize(3, 3).withPosition(shuffleboardCameraXPos, 0);
+      shuffleboardCameraXPos += 3;
+    }
 
     return camera;
   }
@@ -254,10 +254,8 @@ public final class Main {
     // start NetworkTables
     NetworkTableInstance networkTableInstance = NetworkTableInstance.getDefault();
     if (server) {
-      // System.out.println("Setting up NetworkTables server");
       networkTableInstance.startServer();
     } else {
-      // System.out.println("Setting up NetworkTables client for team " + team);
       networkTableInstance.startClientTeam(team);
       networkTableInstance.startDSClient();
     }
@@ -287,7 +285,6 @@ public final class Main {
     }
 
     if (ballTrackingCamera != null) {
-      System.out.println("HAVE BALL TRACKING CAMERA");
       BallProcessor ballProcessor = new BallProcessor(ballTrackingCamera, networkTableInstance);
       VisionThread ballVisionThread = new VisionThread(ballTrackingCamera,
           new BallPipeline(networkTableInstance), pipeline -> {
